@@ -57,7 +57,7 @@ func (q *Qty) updateBaseScalar() {
 	// }
 	if q.IsBase() {
 		q.baseScalar = q.scalar
-		q.signature = unitSignature.call(this)
+		q.signature = q.unitSignature()
 	} else {
 		var base = q.ToBase()
 		q.baseScalar = base.scalar

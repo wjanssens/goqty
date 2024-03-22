@@ -20,6 +20,7 @@ func makeUnit(kind string, aliases []string, scalar float64, numerator []string,
 
 var unity = "<1>"
 var unityArray = []string{unity}
+var unityUnit = makeUnit("", []string{"1", "<1>"}, 1, nil, nil)
 
 var prefixes = map[string]Unit{
 	// prefixes
@@ -56,7 +57,7 @@ var prefixes = map[string]Unit{
 var prefixesByAlias = makeUnitAliasMap(prefixes)
 
 var units = map[string]Unit{
-	"<1>":       makeUnit("", []string{"1", "<1>"}, 1, nil, nil),
+	"<1>":       unityUnit,
 	"<decibel>": makeUnit("logarithmic", []string{"dB", "decibel", "decibels"}, 1, []string{"decibel"}, nil),
 
 	//length
@@ -76,6 +77,7 @@ var units = map[string]Unit{
 	"<point>":     makeUnit("length", []string{"pt", "point", "points"}, 0.000352777778, []string{"meter"}, nil),
 }
 var unitsByAlias = makeUnitAliasMap(units)
+var valuesByUnitAlias = makeUnitValuesMap(units)
 var outputs = makeOutputsMap(units)
 var baseUnits = []string{"<meter>", "<kilogram>", "<second>", "<mole>", "<ampere>", "<radian>", "<kelvin>", "<temp-K>", "<byte>", "<dollar>", "<candela>", "<each>", "<steradian>", "<decibel>"}
 

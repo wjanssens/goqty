@@ -5,6 +5,16 @@ import (
 	"math"
 )
 
+func filter[T any](slice []T, f func(T) bool) []T {
+	var n []T
+	for _, e := range slice {
+		if f(e) {
+			n = append(n, e)
+		}
+	}
+	return n
+}
+
 func reduce[T, M any](s []T, f func(M, T) M, initValue M) M {
 	acc := initValue
 	for _, v := range s {

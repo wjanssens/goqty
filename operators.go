@@ -8,67 +8,71 @@ func (q *Qty) Add(other Qty) (Qty, error) {
 		denominator: q.denominator,
 	}
 	if !q.IsCompatible(other) {
-		return result, fmt.Errorf("Incompatible Units")
+		return result, fmt.Errorf("Incompatible Units %v, %v", q.Units(), other.Units())
 	}
 	if q.IsTemperature() && other.IsTemperature() {
 		return result, fmt.Errorf("Cannot add two temperatures")
 	} else if q.IsTemperature() {
-		return addTempDegrees(q, other)
+		return addTempDegrees(*q, other)
 	} else if other.IsTemperature() {
-		return addTempDegrees(other, q)
+		return addTempDegrees(other, *q)
 	}
-	result.scalar = q.scalar + other.To(q.Units()).scalar
+	if to, err := other.To(q.Units()); err != nil {
+		return result, err
+	} else {
+		result.scalar = q.scalar + to.scalar
+	}
+	return result, nil
 }
 
-// assign(Qty.prototype, {
+func (q *Qty) Sub(other Qty) (Qty, error) {
+	result := Qty{
+		numerator:   q.numerator,
+		denominator: q.denominator,
+	}
 
-//   sub: function(other) {
-//     if (isString(other)) {
-//       other = Qty(other);
-//     }
+	if !q.IsCompatible(other) {
+		return result, fmt.Errorf("Incompatible Units %v, %v", q.Units(), other.Units())
+	}
 
-//     if (!this.isCompatible(other)) {
-//       throwIncompatibleUnits(this.units(), other.units());
-//     }
+	if q.IsTemperature() && other.IsTemperature() {
+		return subtractTemperatures(*q, other)
+	} else if q.IsTemperature() {
+		return subtractTempDegrees(*q, other)
+	} else if other.IsTemperature() {
+		return result, fmt.Errorf("Cannot subtract a temperature from a differential degree unit")
+	}
 
-//     if (this.isTemperature() && other.isTemperature()) {
-//       return subtractTemperatures(this,other);
-//     }
-//     else if (this.isTemperature()) {
-//       return subtractTempDegrees(this,other);
-//     }
-//     else if (other.isTemperature()) {
-//       throw new QtyError("Cannot subtract a temperature from a differential degree unit");
-//     }
+	if to, err := other.To(q); err != nil {
+		return result, err
+	} else {
+		return Qty{scalar: q.scalar - to.scalar, numerator: q.numerator, denominator: q.denominator}, nil
+	}
+}
 
-//     return Qty({"scalar": this.scalar - other.to(this).scalar, "numerator": this.numerator, "denominator": this.denominator});
-//   },
+func (q *Qty) Mul(other Qty) (Qty, error) {
+	if (q.IsTemperature() || other.IsTemperature()) && !(q.IsUnitless() || other.IsUnitless()) {
+		return Qty{}, fmt.Errorf("Cannot multiply by temperatures")
+	}
 
-//   mul: function(other) {
-//     if (isNumber(other)) {
-//       return Qty({"scalar": mulSafe(this.scalar, other), "numerator": this.numerator, "denominator": this.denominator});
-//     }
-//     else if (isString(other)) {
-//       other = Qty(other);
-//     }
+	// Quantities should be multiplied with same units if compatible, with base units else
+	op1 := q
+	op2 := other
 
-//     if ((this.isTemperature() || other.isTemperature()) && !(this.isUnitless() || other.isUnitless())) {
-//       throw new QtyError("Cannot multiply by temperatures");
-//     }
-
-//     // Quantities should be multiplied with same units if compatible, with base units else
-//     var op1 = this;
-//     var op2 = other;
-
-//     // so as not to confuse results, multiplication and division between temperature degrees will maintain original unit info in num/den
-//     // multiplication and division between deg[CFRK] can never factor each other out, only themselves: "degK*degC/degC^2" == "degK/degC"
-//     if (op1.isCompatible(op2) && op1.signature !== 400) {
-//       op2 = op2.to(op1);
-//     }
-//     var numdenscale = cleanTerms(op1.numerator, op1.denominator, op2.numerator, op2.denominator);
-
-//     return Qty({"scalar": mulSafe(op1.scalar, op2.scalar, numdenscale[2]), "numerator": numdenscale[0], "denominator": numdenscale[1]});
-//   },
+	// so as not to confuse results, multiplication and division between temperature degrees will maintain original unit info in num/den
+	// multiplication and division between deg[CFRK] can never factor each other out, only themselves: "degK*degC/degC^2" == "degK/degC"
+	if op1.IsCompatible(op2) && op1.signature != 400 {
+		if op2, err = op2.To(op1); err != nil {
+			return Qty{}, err
+		}
+	}
+	numdenscale := cleanTerms(op1.numerator, op1.denominator, op2.numerator, op2.denominator)
+	if scalar, err := mulSafe(op1.scalar, op2.scalar, numdenscale[2]); err != nil {
+		return Qty{}, err
+	} else {
+		return Qty{scalar: scalar, numerator: numdenscale[0], denominator: numdenscale[1]}, nil
+	}
+}
 
 //   div: function(other) {
 //     if (isNumber(other)) {
@@ -117,88 +121,96 @@ func (q *Qty) Inverse() (Qty, error) {
 	return Qty{scalar: 1 / q.scalar, numerator: q.denominator, denominator: q.numerator}, nil
 }
 
-// function cleanTerms(num1, den1, num2, den2) {
-//   function notUnity(val) {
-//     return val !== UNITY;
-//   }
+type combinedType struct {
+	dir    int
+	term   string
+	prefix Unit
+	v1     float64
+	v2     float64
+}
 
-//   num1 = num1.filter(notUnity);
-//   num2 = num2.filter(notUnity);
-//   den1 = den1.filter(notUnity);
-//   den2 = den2.filter(notUnity);
+func cleanTerms(num1, den1, num2, den2 []string) (num []string, den []string, scale float64, err error) {
+	notUnity := func(val string) bool {
+		return val != unity
+	}
 
-//   var combined = {};
+	num1 = filter(num1, notUnity)
+	num2 = filter(num2, notUnity)
+	den1 = filter(den1, notUnity)
+	den2 = filter(den2, notUnity)
 
-//   function combineTerms(terms, direction) {
-//     var k;
-//     var prefix;
-//     var prefixValue;
-//     for (var i = 0; i < terms.length; i++) {
-//       if (PREFIX_VALUES[terms[i]]) {
-//         k = terms[i + 1];
-//         prefix = terms[i];
-//         prefixValue = PREFIX_VALUES[prefix];
-//         i++;
-//       }
-//       else {
-//         k = terms[i];
-//         prefix = null;
-//         prefixValue = 1;
-//       }
-//       if (k && k !== UNITY) {
-//         if (combined[k]) {
-//           combined[k][0] += direction;
-//           var combinedPrefixValue = combined[k][2] ? PREFIX_VALUES[combined[k][2]] : 1;
-//           combined[k][direction === 1 ? 3 : 4] *= divSafe(prefixValue, combinedPrefixValue);
-//         }
-//         else {
-//           combined[k] = [direction, k, prefix, 1, 1];
-//         }
-//       }
-//     }
-//   }
+	combined := make(map[string]combinedType)
 
-//   combineTerms(num1, 1);
-//   combineTerms(den1, -1);
-//   combineTerms(num2, 1);
-//   combineTerms(den2, -1);
+	combineTerms := func(terms []string, direction int) {
+		var k string
+		var prefix Unit
 
-//   var num = [];
-//   var den = [];
-//   var scale = 1;
+		for i, term := range terms {
+			if p, ok := prefixes[term]; ok {
+				k = terms[i+1]
+				prefix = p
+			} else {
+				k = term
+				prefix = unityUnit
+			}
+			if k != "" && k != unity {
+				if c, ok := combined[k]; ok {
+					c.dir += direction
+					combinedPrefixValue := c.prefix.scalar
+					if v, err := divSafe(prefix.scalar, combinedPrefixValue); err != nil {
+						// TODO
+					} else if c.dir == 1 {
+						c.v1 *= v
+					} else {
+						c.v2 *= v
+					}
+				} else {
+					combined[k] = combinedType{dir: direction, term: k, prefix: prefix, v1: 1.0, v2: 1.0}
+				}
+			}
+		}
+	}
 
-//   for (var prop in combined) {
-//     if (combined.hasOwnProperty(prop)) {
-//       var item = combined[prop];
-//       var n;
-//       if (item[0] > 0) {
-//         for (n = 0; n < item[0]; n++) {
-//           num.push(item[2] === null ? item[1] : [item[2], item[1]]);
-//         }
-//       }
-//       else if (item[0] < 0) {
-//         for (n = 0; n < -item[0]; n++) {
-//           den.push(item[2] === null ? item[1] : [item[2], item[1]]);
-//         }
-//       }
-//       scale *= divSafe(item[3], item[4]);
-//     }
-//   }
+	combineTerms(num1, 1)
+	combineTerms(den1, -1)
+	combineTerms(num2, 1)
+	combineTerms(den2, -1)
 
-//   if (num.length === 0) {
-//     num = UNITY_ARRAY;
-//   }
-//   if (den.length === 0) {
-//     den = UNITY_ARRAY;
-//   }
+	num := []string{}
+	den := []string{}
+	scale := float64(1)
 
-//   // Flatten
-//   num = num.reduce(function(a,b) {
-//     return a.concat(b);
-//   }, []);
-//   den = den.reduce(function(a,b) {
-//     return a.concat(b);
-//   }, []);
+	for k, v := range combined {
+		if v.dir > 0 {
+			for n := 0; n < v.dir; n++ {
+				if v.prefix == unity {
+					num = append(num, v.term)
+				} else {
+					num = append(num, v.prefix, v.term)
+				}
+			}
+		} else if v.dir < 0 {
+			for n := 0; n < -v.dir; n++ {
+				if v.prefix == unity {
+					den = append(den, v.term)
+				} else {
+					den = append(den, v.prefix, v.term)
+				}
+			}
+		}
+		if s, err := divSafe(v.v1, v.v2); err != nil {
+			return nil, nil, 0, err
+		} else {
+			scale *= s
+		}
+	}
 
-//   return [num, den, scale];
-// }
+	if len(num) == 0 {
+		num = unityArray
+	}
+	if len(den) == 0 {
+		den = unityArray
+	}
+
+	return num, den, scale, nil
+}

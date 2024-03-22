@@ -3,7 +3,6 @@ package goqty
 import (
 	"fmt"
 	"regexp"
-	"slices"
 	"sort"
 	"strconv"
 	"strings"
