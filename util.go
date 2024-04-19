@@ -84,3 +84,7 @@ func getFractional(f float64) float64 {
 func isFinite(f float64) bool {
 	return !(math.IsInf(f, 0) || math.IsNaN(f))
 }
+
+func identity(value float64) (float64, error) {
+	return value, nil
+}

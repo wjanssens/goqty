@@ -50,7 +50,25 @@ func (q *Qty) Sub(other Qty) (Qty, error) {
 	}
 }
 
-func (q *Qty) Mul(other Qty) (Qty, error) {
+func (q *Qty) Mul(input interface{}) (Qty, error) {
+	var other Qty
+	switch t := input.(type) {
+	case float64:
+		return NewQty(mulSafe(input.(float64), q.scalar), q.units)
+	case float32:
+		return NewQty(mulSafe(float64(input.(float32)), q.scalar), q.units)
+	case int:
+		return NewQty(mulSafe(float64(input.(int)), q.scalar), q.units)
+	case Qty:
+		other = input.(Qty)
+	case string:
+		if other, err := Parse(input.(string)); err != nil {
+			return other, err
+		}
+	default:
+		return Qty{}, fmt.Errorf("Cannot multiply type %T", t)
+	}
+
 	if (q.IsTemperature() || other.IsTemperature()) && !(q.IsUnitless() || other.IsUnitless()) {
 		return Qty{}, fmt.Errorf("Cannot multiply by temperatures")
 	}
@@ -58,57 +76,85 @@ func (q *Qty) Mul(other Qty) (Qty, error) {
 	// Quantities should be multiplied with same units if compatible, with base units else
 	op1 := q
 	op2 := other
+	var err error
 
 	// so as not to confuse results, multiplication and division between temperature degrees will maintain original unit info in num/den
 	// multiplication and division between deg[CFRK] can never factor each other out, only themselves: "degK*degC/degC^2" == "degK/degC"
 	if op1.IsCompatible(op2) && op1.signature != 400 {
-		if op2, err = op2.To(op1); err != nil {
+		if op2, err = op2.To(op1.units); err != nil {
 			return Qty{}, err
 		}
 	}
-	numdenscale := cleanTerms(op1.numerator, op1.denominator, op2.numerator, op2.denominator)
-	if scalar, err := mulSafe(op1.scalar, op2.scalar, numdenscale[2]); err != nil {
+	if num, den, scale, err := cleanTerms(op1.numerator, op1.denominator, op2.numerator, op2.denominator); err != nil {
 		return Qty{}, err
 	} else {
-		return Qty{scalar: scalar, numerator: numdenscale[0], denominator: numdenscale[1]}, nil
+		scalar := mulSafe(op1.scalar, op2.scalar, scale)
+		return Qty{scalar: scalar, numerator: num, denominator: den}, nil
 	}
 }
 
-//   div: function(other) {
-//     if (isNumber(other)) {
-//       if (other === 0) {
-//         throw new QtyError("Divide by zero");
-//       }
-//       return Qty({"scalar": this.scalar / other, "numerator": this.numerator, "denominator": this.denominator});
-//     }
-//     else if (isString(other)) {
-//       other = Qty(other);
-//     }
+func (q *Qty) Div(input interface{}) (Qty, error) {
+	var other Qty
+	switch t := input.(type) {
+	case float64:
+		scalar := input.(float64)
+		if scalar = float64(input.(float64)); scalar == 0 {
+			return Qty{}, fmt.Errorf("Divide by zero")
+		} else {
+			return NewQty(q.scalar/scalar, q.units)
+		}
+	case float32:
+		scalar := float64(input.(float64))
+		if scalar = float64(input.(float64)); scalar == 0 {
+			return Qty{}, fmt.Errorf("Divide by zero")
+		} else {
+			return NewQty(q.scalar/scalar, q.units)
+		}
+	case int:
+		scalar := float64(input.(float64))
+		if scalar = float64(input.(float64)); scalar == 0 {
+			return Qty{}, fmt.Errorf("Divide by zero")
+		} else {
+			return NewQty(q.scalar/scalar, q.units)
+		}
+	case Qty:
+		other = input.(Qty)
+	case string:
+		if other, err := Parse(input.(string)); err != nil {
+			return other, err
+		}
+	default:
+		return Qty{}, fmt.Errorf("Cannot multiply type %T", t)
+	}
 
-//     if (other.scalar === 0) {
-//       throw new QtyError("Divide by zero");
-//     }
+	if other.scalar == 0 {
+		return Qty{}, fmt.Errorf("Divide by zero")
+	}
 
-//     if (other.isTemperature()) {
-//       throw new QtyError("Cannot divide with temperatures");
-//     }
-//     else if (this.isTemperature() && !other.isUnitless()) {
-//       throw new QtyError("Cannot divide with temperatures");
-//     }
+	if other.IsTemperature() {
+		return Qty{}, fmt.Errorf("Cannot divide with temperatures")
+	} else if q.IsTemperature() && !other.IsUnitless() {
+		return Qty{}, fmt.Errorf("Cannot divide with temperatures")
+	}
 
-//     // Quantities should be multiplied with same units if compatible, with base units else
-//     var op1 = this;
-//     var op2 = other;
+	// Quantities should be multiplied with same units if compatible, with base units else
+	op1 := q
+	op2 := other
+	var err error
 
-//     // so as not to confuse results, multiplication and division between temperature degrees will maintain original unit info in num/den
-//     // multiplication and division between deg[CFRK] can never factor each other out, only themselves: "degK*degC/degC^2" == "degK/degC"
-//     if (op1.isCompatible(op2) && op1.signature !== 400) {
-//       op2 = op2.to(op1);
-//     }
-//     var numdenscale = cleanTerms(op1.numerator, op1.denominator, op2.denominator, op2.numerator);
-
-//     return Qty({"scalar": mulSafe(op1.scalar, numdenscale[2]) / op2.scalar, "numerator": numdenscale[0], "denominator": numdenscale[1]});
-//   },
+	// so as not to confuse results, multiplication and division between temperature degrees will maintain original unit info in num/den
+	// multiplication and division between deg[CFRK] can never factor each other out, only themselves: "degK*degC/degC^2" == "degK/degC"
+	if op1.IsCompatible(op2) && op1.signature != 400 {
+		if op2, err = op2.To(op1.units); err != nil {
+			return Qty{}, err
+		}
+	}
+	if num, den, scale, err := cleanTerms(op1.numerator, op1.denominator, op2.denominator, op2.numerator); err != nil {
+		return Qty{}, err
+	} else {
+		return Qty{scalar: mulSafe(op1.scalar, scale) / op2.scalar, numerator: num, denominator: den}, nil
+	}
+}
 
 // // Returns a Qty that is the inverse of this Qty,
 func (q *Qty) Inverse() (Qty, error) {
@@ -176,11 +222,11 @@ func cleanTerms(num1, den1, num2, den2 []string) (num []string, den []string, sc
 	combineTerms(num2, 1)
 	combineTerms(den2, -1)
 
-	num := []string{}
-	den := []string{}
-	scale := float64(1)
+	num = []string{}
+	den = []string{}
+	scale = float64(1)
 
-	for k, v := range combined {
+	for _, v := range combined {
 		if v.dir > 0 {
 			for n := 0; n < v.dir; n++ {
 				if v.prefix == unity {

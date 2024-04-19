@@ -65,11 +65,13 @@ func (q *Qty) ToBase() (Qty, error) {
 
 	units := q.Units()
 	if cached, found := baseUnitCache.Load(units); found {
-		return cached.Mul(q.scalar)
+		c := cached.(Qty)
+		NewQty(q.scalar, c.units)
+		return c.Mul(q.scalar)
 	} else {
-		cached = toBaseUnits(q.numerator, q.denominator)
+		base := toBaseUnits(q.numerator, q.denominator)
 		baseUnitCache.Store(units, cached)
-		return cached.Mul(q.scalar)
+		return base.Mul(q.scalar)
 	}
 }
 
@@ -137,43 +139,55 @@ func (q *Qty) ToPrec(precision Qty) (Qty, error) {
  * // into other units
  * var converter = Qty.swiftConverter("m/h", "ft/s");
  * var convertedSerie = largeSerie.map(converter);
- *
  */
-func swiftConverter(srcUnits, dstUnits string) {
-	srcQty := NewQty(srcUnits)
-	dstQty := NewQty(dstUnits)
-
-	if srcQty.Eq(dstQty) {
-		return identity
+func SwiftConverter(srcUnits, dstUnits string) (converter func(values []float64) ([]float64, error), err error) {
+	var srcQty Qty
+	var dstQty Qty
+	if srcQty, err = Parse(srcUnits); err != nil {
+		return converter, err
+	}
+	if dstQty, err = Parse(dstUnits); err != nil {
+		return converter, err
 	}
 
-	//   var convert;
-	//   if (!srcQty.isTemperature()) {
-	//     convert = function(value) {
-	//       return value * srcQty.baseScalar / dstQty.baseScalar;
-	//     };
-	//   }
-	//   else {
-	//     convert = function(value) {
-	//       // TODO Not optimized
-	//       return srcQty.mul(value).to(dstQty).scalar;
-	//     };
-	//   }
+	if srcQty.Eq(dstQty) {
+		return func(values []float64) ([]float64, error) {
+			return values, nil
+		}, nil
+	}
 
-	//	return function converter(value) {
-	//	  var i, length, result;
-	//	  if (!Array.isArray(value)) {
-	//	    return convert(value);
-	//	  }
-	//	  else {
-	//	    length = value.length;
-	//	    result = [];
-	//	    for (i = 0; i < length; i++) {
-	//	      result.push(convert(value[i]));
-	//	    }
-	//	    return result;
-	//	  }
-	//	};
+	var convert func(values float64) (float64, error)
+	if !srcQty.IsTemperature() {
+		convert = func(value float64) (float64, error) {
+			return value * srcQty.baseScalar / dstQty.baseScalar, nil
+		}
+	} else {
+		convert = func(value float64) (float64, error) {
+			// TODO Not optimized
+			if q, err := srcQty.Mul(value); err != nil {
+				return value, err
+			} else {
+				if t, err := q.To(dstQty.units); err != nil {
+					return value, err
+				} else {
+					return t.scalar, nil
+				}
+			}
+		}
+	}
+
+	converter = func(values []float64) ([]float64, error) {
+		result := make([]float64, len(values))
+		for _, v := range values {
+			if c, err := convert(v); err != nil {
+				return result, err
+			} else {
+				result = append(result, c)
+			}
+		}
+		return result, nil
+	}
+
 }
 
 func toBaseUnits(numerator, denominator []string) Qty {

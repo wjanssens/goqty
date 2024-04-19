@@ -51,7 +51,7 @@ func NewQty(scalar float64, units string) (Qty, error) {
 	return result, nil
 }
 
-func (q *Qty) updateBaseScalar() {
+func (q *Qty) updateBaseScalar() error {
 	// if q.baseScalar != 0 {
 	//   return q.baseScalar
 	// }
@@ -59,8 +59,12 @@ func (q *Qty) updateBaseScalar() {
 		q.baseScalar = q.scalar
 		q.signature = q.unitSignature()
 	} else {
-		var base = q.ToBase()
-		q.baseScalar = base.scalar
-		q.signature = base.signature
+		if base, err := q.ToBase(); err != nil {
+			return err
+		} else {
+			q.baseScalar = base.scalar
+			q.signature = base.signature
+		}
 	}
+	return nil
 }

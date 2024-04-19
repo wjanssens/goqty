@@ -60,164 +60,161 @@ var units = map[string]Unit{
 	"<1>":       unityUnit,
 	"<decibel>": makeUnit("logarithmic", []string{"dB", "decibel", "decibels"}, 1, []string{"decibel"}, nil),
 
-	//length
-	"<meter>":     makeUnit("length", []string{"m", "meter", "meters", "metre", "metres"}, 1, []string{"meter"}, nil),
-	"<inch>":      makeUnit("length", []string{"in", "inch", "inches", "\""}, 0.0254, []string{"meter"}, nil),
-	"<foot>":      makeUnit("length", []string{"ft", "foot", "feet", "'"}, 0.3048, []string{"meter"}, nil),
-	"<yard>":      makeUnit("length", []string{"yd", "yard", "yards"}, 0.9144, []string{"meter"}, nil),
-	"<mile>":      makeUnit("length", []string{"mi", "mile", "miles"}, 1609.344, []string{"meter"}, nil),
-	"<naut-mile>": makeUnit("length", []string{"nmi", "naut-mile"}, 1852, []string{"meter"}, nil),
-	"<league>":    makeUnit("length", []string{"league", "leagues"}, 4828, []string{"meter"}, nil),
-	"<furlong>":   makeUnit("length", []string{"furlong", "furlongs"}, 201.2, []string{"meter"}, nil),
-	"<rod>":       makeUnit("length", []string{"rd", "rod", "rods"}, 5.029, []string{"meter"}, nil),
-	"<mil>":       makeUnit("length", []string{"mil", "mils"}, 0.0000254, []string{"meter"}, nil),
-	"<angstrom>":  makeUnit("length", []string{"ang", "angstrom", "angstroms"}, 1e-10, []string{"meter"}, nil),
-	"<fathom>":    makeUnit("length", []string{"fathom", "fathoms"}, 1.829, []string{"meter"}, nil),
-	"<pica>":      makeUnit("length", []string{"pc", "pica", "picas"}, 0.00423333333, []string{"meter"}, nil),
-	"<point>":     makeUnit("length", []string{"pt", "point", "points"}, 0.000352777778, []string{"meter"}, nil),
+	// length
+	"<meter>":        makeUnit("length", []string{"m", "meter", "meters", "metre", "metres"}, 1, []string{"meter"}, nil),
+	"<inch>":         makeUnit("length", []string{"in", "inch", "inches", "\""}, 0.0254, []string{"meter"}, nil),
+	"<foot>":         makeUnit("length", []string{"ft", "foot", "feet", "'"}, 0.3048, []string{"meter"}, nil),
+	"<yard>":         makeUnit("length", []string{"yd", "yard", "yards"}, 0.9144, []string{"meter"}, nil),
+	"<mile>":         makeUnit("length", []string{"mi", "mile", "miles"}, 1609.344, []string{"meter"}, nil),
+	"<naut-mile>":    makeUnit("length", []string{"nmi", "naut-mile"}, 1852, []string{"meter"}, nil),
+	"<league>":       makeUnit("length", []string{"league", "leagues"}, 4828, []string{"meter"}, nil),
+	"<furlong>":      makeUnit("length", []string{"furlong", "furlongs"}, 201.2, []string{"meter"}, nil),
+	"<rod>":          makeUnit("length", []string{"rd", "rod", "rods"}, 5.029, []string{"meter"}, nil),
+	"<mil>":          makeUnit("length", []string{"mil", "mils"}, 0.0000254, []string{"meter"}, nil),
+	"<angstrom>":     makeUnit("length", []string{"ang", "angstrom", "angstroms"}, 1e-10, []string{"meter"}, nil),
+	"<fathom>":       makeUnit("length", []string{"fathom", "fathoms"}, 1.829, []string{"meter"}, nil),
+	"<pica>":         makeUnit("length", []string{"pc", "pica", "picas"}, 0.00423333333, []string{"meter"}, nil),
+	"<point>":        makeUnit("length", []string{"pt", "point", "points"}, 0.000352777778, []string{"meter"}, nil),
+	"<redshift>":     makeUnit("length", []string{"z", "red-shift", "redshift"}, 1.302773e26, []string{"<meter>"}, nil),
+	"<AU>":           makeUnit("length", []string{"AU", "astronomical-unit"}, 149597900000, []string{"<meter>"}, nil),
+	"<light-second>": makeUnit("length", []string{"ls", "light-second"}, 299792500, []string{"<meter>"}, nil),
+	"<light-minute>": makeUnit("length", []string{"lmin", "light-minute"}, 17987550000, []string{"<meter>"}, nil),
+	"<light-year>":   makeUnit("length", []string{"ly", "light-year"}, 9460528000000000, []string{"<meter>"}, nil),
+	"<parsec>":       makeUnit("length", []string{"pc", "parsec", "parsecs"}, 30856780000000000, []string{"<meter>"}, nil),
+	"<datamile>":     makeUnit("length", []string{"DM", "datamile"}, 1828.8, []string{"<meter>"}, nil),
+
+	// mass
+	"<kilogram>":   makeUnit("mass", []string{"kg", "kilogram", "kilograms"}, 1.0, []string{"<kilogram>"}, nil),
+	"<AMU>":        makeUnit("mass", []string{"u", "AMU", "amu"}, 1.660538921e-27, []string{"<kilogram>"}, nil),
+	"<dalton>":     makeUnit("mass", []string{"Da", "Dalton", "Daltons", "dalton", "daltons"}, 1.660538921e-27, []string{"<kilogram>"}, nil),
+	"<slug>":       makeUnit("mass", []string{"slug", "slugs"}, 14.5939029, []string{"<kilogram>"}, nil),
+	"<short-ton>":  makeUnit("mass", []string{"tn", "ton", "short-ton"}, 907.18474, []string{"<kilogram>"}, nil),
+	"<metric-ton>": makeUnit("mass", []string{"t", "tonne", "metric-ton"}, 1000, []string{"<kilogram>"}, nil),
+	"<carat>":      makeUnit("mass", []string{"ct", "carat", "carats"}, 0.0002, []string{"<kilogram>"}, nil),
+	"<pound>":      makeUnit("mass", []string{"lbs", "lb", "pound", "pounds", "#"}, 0.45359237, []string{"<kilogram>"}, nil),
+	"<ounce>":      makeUnit("mass", []string{"oz", "ounce", "ounces"}, 0.0283495231, []string{"<kilogram>"}, nil),
+	"<gram>":       makeUnit("mass", []string{"g", "gram", "grams", "gramme", "grammes"}, 1e-3, []string{"<kilogram>"}, nil),
+	"<grain>":      makeUnit("mass", []string{"grain", "grains", "gr"}, 6.479891e-5, []string{"<kilogram>"}, nil),
+	"<dram>":       makeUnit("mass", []string{"dram", "drams", "dr"}, 0.0017718452, []string{"<kilogram>"}, nil),
+	"<stone>":      makeUnit("mass", []string{"stone", "stones", "st"}, 6.35029318, []string{"<kilogram>"}, nil),
+
+	// time
+	"<second>":    makeUnit("time", []string{"s", "sec", "secs", "second", "seconds"}, 1.0, []string{"<second>"}, nil),
+	"<minute>":    makeUnit("time", []string{"min", "mins", "minute", "minutes"}, 60.0, []string{"<second>"}, nil),
+	"<hour>":      makeUnit("time", []string{"h", "hr", "hrs", "hour", "hours"}, 3600.0, []string{"<second>"}, nil),
+	"<day>":       makeUnit("time", []string{"d", "day", "days"}, 3600*24, []string{"<second>"}, nil),
+	"<week>":      makeUnit("time", []string{"wk", "week", "weeks"}, 7*3600*24, []string{"<second>"}, nil),
+	"<fortnight>": makeUnit("time", []string{"fortnight", "fortnights"}, 1209600, []string{"<second>"}, nil),
+	"<year>":      makeUnit("time", []string{"y", "yr", "year", "years", "annum"}, 31556926, []string{"<second>"}, nil),
+	"<decade>":    makeUnit("time", []string{"decade", "decades"}, 315569260, []string{"<second>"}, nil),
+	"<century>":   makeUnit("time", []string{"century", "centuries"}, 3155692600, []string{"<second>"}, nil),
+
+	// substance
+	"<mole>": makeUnit("substance", []string{"mol", "mole"}, 1.0, []string{"<mole>"}, nil),
+
+	// current
+	"<ampere>": makeUnit("current", []string{"A", "Ampere", "ampere", "amp", "amps"}, 1.0, []string{"<ampere>"}, nil),
+
+	// area
+	"<hectare>": makeUnit("area", []string{"hectare"}, 10000, []string{"<meter>", "<meter>"}, nil),
+	"<acre>":    makeUnit("area", []string{"acre", "acres"}, 4046.85642, []string{"<meter>", "<meter>"}, nil),
+	"<sqft>":    makeUnit("area", []string{"sqft"}, 1, []string{"<foot>", "<foot>"}, nil),
+
+	// volume
+	"<liter>":           makeUnit("volume", []string{"l", "L", "liter", "liters", "litre", "litres"}, 0.001, []string{"<meter>", "<meter>", "<meter>"}, nil),
+	"<gallon>":          makeUnit("volume", []string{"gal", "gallon", "gallons"}, 0.0037854118, []string{"<meter>", "<meter>", "<meter>"}, nil),
+	"<gallon-imp>":      makeUnit("volume", []string{"galimp", "gallon-imp", "gallons-imp"}, 0.0045460900, []string{"<meter>", "<meter>", "<meter>"}, nil),
+	"<quart>":           makeUnit("volume", []string{"qt", "quart", "quarts"}, 0.00094635295, []string{"<meter>", "<meter>", "<meter>"}, nil),
+	"<pint>":            makeUnit("volume", []string{"pt", "pint", "pints"}, 0.000473176475, []string{"<meter>", "<meter>", "<meter>"}, nil),
+	"<pint-imp>":        makeUnit("volume", []string{"ptimp", "pint-imp", "pints-imp"}, 5.6826125e-4, []string{"<meter>", "<meter>", "<meter>"}, nil),
+	"<cup>":             makeUnit("volume", []string{"cu", "cup", "cups"}, 0.000236588238, []string{"<meter>", "<meter>", "<meter>"}, nil),
+	"<fluid-ounce>":     makeUnit("volume", []string{"floz", "fluid-ounce", "fluid-ounces"}, 2.95735297e-5, []string{"<meter>", "<meter>", "<meter>"}, nil),
+	"<fluid-ounce-imp>": makeUnit("volume", []string{"flozimp", "floz-imp", "fluid-ounce-imp", "fluid-ounces-imp"}, 2.84130625e-5, []string{"<meter>", "<meter>", "<meter>"}, nil),
+	"<tablespoon>":      makeUnit("volume", []string{"tb", "tbsp", "tbs", "tablespoon", "tablespoons"}, 1.47867648e-5, []string{"<meter>", "<meter>", "<meter>"}, nil),
+	"<teaspoon>":        makeUnit("volume", []string{"tsp", "teaspoon", "teaspoons"}, 4.92892161e-6, []string{"<meter>", "<meter>", "<meter>"}, nil),
+	"<bushel>":          makeUnit("volume", []string{"bu", "bsh", "bushel", "bushels"}, 0.035239072, []string{"<meter>", "<meter>", "<meter>"}, nil),
+	"<oilbarrel>":       makeUnit("volume", []string{"bbl", "oilbarrel", "oilbarrels", "oil-barrel", "oil-barrels"}, 0.158987294928, []string{"<meter>", "<meter>", "<meter>"}, nil),
+	"<beerbarrel>":      makeUnit("volume", []string{"bl", "bl-us", "beerbarrel", "beerbarrels", "beer-barrel", "beer-barrels"}, 0.1173477658, []string{"<meter>", "<meter>", "<meter>"}, nil),
+	"<beerbarrel-imp>":  makeUnit("volume", []string{"blimp", "bl-imp", "beerbarrel-imp", "beerbarrels-imp", "beer-barrel-imp", "beer-barrels-imp"}, 0.16365924, []string{"<meter>", "<meter>", "<meter>"}, nil),
+
+	// speed
+	"<kph>":  makeUnit("speed", []string{"kph"}, 0.277777778, []string{"<meter>"}, []string{"<second>"}),
+	"<mph>":  makeUnit("speed", []string{"mph"}, 0.44704, []string{"<meter>"}, []string{"<second>"}),
+	"<knot>": makeUnit("speed", []string{"kt", "kn", "kts", "knot", "knots"}, 0.514444444, []string{"<meter>"}, []string{"<second>"}),
+	"<fps>":  makeUnit("speed", []string{"fps"}, 0.3048, []string{"<meter>"}, []string{"<second>"}),
+
+	// acceleration
+	"<gee>": makeUnit("acceleration", []string{"gee"}, 9.80665, []string{"<meter>"}, []string{"<second>", "<second>"}),
+	"<Gal>": makeUnit("acceleration", []string{"Gal"}, 1e-2, []string{"<meter>"}, []string{"<second>", "<second>"}),
+
+	// temperature_difference
+	"<kelvin>":     makeUnit("temperature", []string{"degK", "kelvin"}, 1.0, []string{"<kelvin>"}, nil),
+	"<celsius>":    makeUnit("temperature", []string{"degC", "celsius", "celsius", "centigrade"}, 1.0, []string{"<kelvin>"}, nil),
+	"<fahrenheit>": makeUnit("temperature", []string{"degF", "fahrenheit"}, 5/9, []string{"<kelvin>"}, nil),
+	"<rankine>":    makeUnit("temperature", []string{"degR", "rankine"}, 5/9, []string{"<kelvin>"}, nil),
+	"<temp-K>":     makeUnit("temperature", []string{"tempK", "temp-K"}, 1.0, []string{"<temp-K>"}, nil),
+	"<temp-C>":     makeUnit("temperature", []string{"tempC", "temp-C"}, 1.0, []string{"<temp-K>"}, nil),
+	"<temp-F>":     makeUnit("temperature", []string{"tempF", "temp-F"}, 5/9, []string{"<temp-K>"}, nil),
+	"<temp-R>":     makeUnit("temperature", []string{"tempR", "temp-R"}, 5/9, []string{"<temp-K>"}, nil),
+
+	// pressure
+	"<pascal>": makeUnit("pressure", []string{"Pa", "pascal", "Pascal"}, 1.0, []string{"<kilogram>"}, []string{"<meter>", "<second>", "<second>"}),
+	"<bar>":    makeUnit("pressure", []string{"bar", "bars"}, 100000, []string{"<kilogram>"}, []string{"<meter>", "<second>", "<second>"}),
+	"<mmHg>":   makeUnit("pressure", []string{"mmHg"}, 133.322368, []string{"<kilogram>"}, []string{"<meter>", "<second>", "<second>"}),
+	"<inHg>":   makeUnit("pressure", []string{"inHg"}, 3386.3881472, []string{"<kilogram>"}, []string{"<meter>", "<second>", "<second>"}),
+	"<torr>":   makeUnit("pressure", []string{"torr"}, 133.322368, []string{"<kilogram>"}, []string{"<meter>", "<second>", "<second>"}),
+	"<atm>":    makeUnit("pressure", []string{"atm", "ATM", "atmosphere", "atmospheres"}, 101325, []string{"<kilogram>"}, []string{"<meter>", "<second>", "<second>"}),
+	"<psi>":    makeUnit("pressure", []string{"psi"}, 6894.76, []string{"<kilogram>"}, []string{"<meter>", "<second>", "<second>"}),
+	"<cmh2o>":  makeUnit("pressure", []string{"cmH2O", "cmh2o"}, 98.0638, []string{"<kilogram>"}, []string{"<meter>", "<second>", "<second>"}),
+	"<inh2o>":  makeUnit("pressure", []string{"inH2O", "inh2o"}, 249.082052, []string{"<kilogram>"}, []string{"<meter>", "<second>", "<second>"}),
+
+	// viscosity
+	"<poise>":  makeUnit("viscosity", []string{"P", "poise"}, 0.1, []string{"<kilogram>"}, []string{"<meter>", "<second>"}),
+	"<stokes>": makeUnit("viscosity", []string{"St", "stokes"}, 1e-4, []string{"<meter>", "<meter>"}, []string{"<second>"}),
+
+	// molar_concentration
+	"<molar>":     makeUnit("molar_concentration", []string{"M", "molar"}, 1000, []string{"<mole>"}, []string{"<meter>", "<meter>", "<meter>"}),
+	"<wtpercent>": makeUnit("molar_concentration", []string{"wt%", "wtpercent"}, 10, []string{"<kilogram>"}, []string{"<meter>", "<meter>", "<meter>"}),
+
+	// activity
+	"<katal>": makeUnit("activity", []string{"kat", "katal", "Katal"}, 1.0, []string{"<mole>"}, []string{"<second>"}),
+	"<unit>":  makeUnit("activity", []string{"U", "enzUnit", "unit"}, 16.667e-16, []string{"<mole>"}, []string{"<second>"}),
+
+	// capacitance
+	"<farad>": makeUnit("capacitance", []string{"F", "farad", "Farad"}, 1.0, []string{"<second>", "<second>", "<second>", "<second>", "<ampere>", "<ampere>"}, []string{"<meter>", "<meter>", "<kilogram>"}),
+
+	// charge
+	"<coulomb>":           makeUnit("charge", []string{"C", "coulomb", "Coulomb"}, 1.0, []string{"<ampere>", "<second>"}, nil),
+	"<Ah>":                makeUnit("charge", []string{"Ah"}, 3600, []string{"<ampere>", "<second>"}, nil),
+	"<elementary-charge>": makeUnit("charge", []string{"e"}, 1.602176634e-19, []string{"<ampere>", "<second>"}, nil),
+
+	// conductance
+	"<siemens>": makeUnit("conductance", []string{"S", "Siemens", "siemens"}, 1.0, []string{"<second>", "<second>", "<second>", "<ampere>", "<ampere>"}, []string{"<kilogram>", "<meter>", "<meter>"}),
+
+	// inductance
+	"<henry>": makeUnit("inductance", []string{"H", "Henry", "henry"}, 1.0, []string{"<meter>", "<meter>", "<kilogram>"}, []string{"<second>", "<second>", "<ampere>", "<ampere>"}),
+
+	// potential
+	"<volt>": makeUnit("potential", []string{"V", "Volt", "volt", "volts"}, 1.0, []string{"<meter>", "<meter>", "<kilogram>"}, []string{"<second>", "<second>", "<second>", "<ampere>"}),
+
+	// resistance
+	// \u2126 is the Ohm sign, \u03a9 is the greek letter omega
+	"<ohm>": makeUnit("resistance", []string{"\u2126", "\u03A9", "Ohm", "ohm"}, 1.0, []string{"<meter>", "<meter>", "<kilogram>"}, []string{"<second>", "<second>", "<second>", "<ampere>", "<ampere>"}),
+
+	// magnetism
+	"<weber>":   makeUnit("magnetism", []string{"Wb", "weber", "webers"}, 1.0, []string{"<meter>", "<meter>", "<kilogram>"}, []string{"<second>", "<second>", "<ampere>"}),
+	"<tesla>":   makeUnit("magnetism", []string{"T", "tesla", "teslas"}, 1.0, []string{"<kilogram>"}, []string{"<second>", "<second>", "<ampere>"}),
+	"<gauss>":   makeUnit("magnetism", []string{"G", "gauss"}, 1e-4, []string{"<kilogram>"}, []string{"<second>", "<second>", "<ampere>"}),
+	"<maxwell>": makeUnit("magnetism", []string{"Mx", "maxwell", "maxwells"}, 1e-8, []string{"<meter>", "<meter>", "<kilogram>"}, []string{"<second>", "<second>", "<ampere>"}),
+	"<oersted>": makeUnit("magnetism", []string{"Oe", "oersted", "oersteds"}, 250.0/math.Pi, []string{"<ampere>"}, []string{"<meter>"}),
 }
 var unitsByAlias = makeUnitAliasMap(units)
-var valuesByUnitAlias = makeUnitValuesMap(units)
+
+// var valuesByUnitAlias = makeUnitValuesMap(units)
 var outputs = makeOutputsMap(units)
 var baseUnits = []string{"<meter>", "<kilogram>", "<second>", "<mole>", "<ampere>", "<radian>", "<kelvin>", "<temp-K>", "<byte>", "<dollar>", "<candela>", "<each>", "<steradian>", "<decibel>"}
 
 // export var UNITS = {
-
-//   "<redshift>" : [["z","red-shift", "redshift"], 1.302773e26, "length", ["<meter>"]],
-//   "<AU>"    : [["AU","astronomical-unit"], 149597900000, "length", ["<meter>"]],
-//   "<light-second>":[["ls","light-second"], 299792500, "length", ["<meter>"]],
-//   "<light-minute>":[["lmin","light-minute"], 17987550000, "length", ["<meter>"]],
-//   "<light-year>" : [["ly","light-year"], 9460528000000000, "length", ["<meter>"]],
-//   "<parsec>"  : [["pc","parsec","parsecs"], 30856780000000000, "length", ["<meter>"]],
-//   "<datamile>"  :  [["DM","datamile"], 1828.8, "length", ["<meter>"]],
-
-//   /* mass */
-//   "<kilogram>" : [["kg","kilogram","kilograms"], 1.0, "mass", ["<kilogram>"]],
-//   "<AMU>" : [["u","AMU","amu"], 1.660538921e-27, "mass", ["<kilogram>"]],
-//   "<dalton>" : [["Da","Dalton","Daltons","dalton","daltons"], 1.660538921e-27, "mass", ["<kilogram>"]],
-//   "<slug>" : [["slug","slugs"], 14.5939029, "mass", ["<kilogram>"]],
-//   "<short-ton>" : [["tn","ton","short-ton"], 907.18474, "mass", ["<kilogram>"]],
-//   "<metric-ton>":[["t","tonne","metric-ton"], 1000, "mass", ["<kilogram>"]],
-//   "<carat>" : [["ct","carat","carats"], 0.0002, "mass", ["<kilogram>"]],
-//   "<pound>" : [["lbs","lb","pound","pounds","#"], 0.45359237, "mass", ["<kilogram>"]],
-//   "<ounce>" : [["oz","ounce","ounces"], 0.0283495231, "mass", ["<kilogram>"]],
-//   "<gram>"    :  [["g","gram","grams","gramme","grammes"], 1e-3, "mass", ["<kilogram>"]],
-//   "<grain>" : [["grain","grains","gr"], 6.479891e-5, "mass", ["<kilogram>"]],
-//   "<dram>"  : [["dram","drams","dr"], 0.0017718452, "mass",["<kilogram>"]],
-//   "<stone>" : [["stone","stones","st"],6.35029318, "mass",["<kilogram>"]],
-
-//   /* area */
-//   "<hectare>":[["hectare"], 10000, "area", ["<meter>","<meter>"]],
-//   "<acre>":[["acre","acres"], 4046.85642, "area", ["<meter>","<meter>"]],
-//   "<sqft>":[["sqft"], 1, "area", ["<foot>","<foot>"]],
-
-//   /* volume */
-//   "<liter>" : [["l","L","liter","liters","litre","litres"], 0.001, "volume", ["<meter>","<meter>","<meter>"]],
-//   "<gallon>":  [["gal","gallon","gallons"], 0.0037854118, "volume", ["<meter>","<meter>","<meter>"]],
-//   "<gallon-imp>":  [["galimp","gallon-imp","gallons-imp"], 0.0045460900, "volume", ["<meter>","<meter>","<meter>"]],
-//   "<quart>":  [["qt","quart","quarts"], 0.00094635295, "volume", ["<meter>","<meter>","<meter>"]],
-//   "<pint>":  [["pt","pint","pints"], 0.000473176475, "volume", ["<meter>","<meter>","<meter>"]],
-//   "<pint-imp>":  [["ptimp","pint-imp","pints-imp"], 5.6826125e-4, "volume", ["<meter>","<meter>","<meter>"]],
-//   "<cup>":  [["cu","cup","cups"], 0.000236588238, "volume", ["<meter>","<meter>","<meter>"]],
-//   "<fluid-ounce>":  [["floz","fluid-ounce","fluid-ounces"], 2.95735297e-5, "volume", ["<meter>","<meter>","<meter>"]],
-//   "<fluid-ounce-imp>":  [["flozimp", "floz-imp","fluid-ounce-imp","fluid-ounces-imp"], 2.84130625e-5, "volume", ["<meter>","<meter>","<meter>"]],
-//   "<tablespoon>":  [["tb","tbsp","tbs","tablespoon","tablespoons"], 1.47867648e-5, "volume", ["<meter>","<meter>","<meter>"]],
-//   "<teaspoon>":  [["tsp","teaspoon","teaspoons"], 4.92892161e-6, "volume", ["<meter>","<meter>","<meter>"]],
-//   "<bushel>":  [["bu","bsh","bushel","bushels"], 0.035239072, "volume", ["<meter>","<meter>","<meter>"]],
-//   "<oilbarrel>":  [["bbl","oilbarrel", "oilbarrels", "oil-barrel","oil-barrels"], 0.158987294928, "volume", ["<meter>","<meter>","<meter>"]],
-//   "<beerbarrel>":  [["bl","bl-us","beerbarrel", "beerbarrels", "beer-barrel","beer-barrels"], 0.1173477658, "volume", ["<meter>","<meter>","<meter>"]],
-//   "<beerbarrel-imp>":  [["blimp","bl-imp","beerbarrel-imp", "beerbarrels-imp", "beer-barrel-imp","beer-barrels-imp"], 0.16365924, "volume", ["<meter>","<meter>","<meter>"]],
-
-//   /* speed */
-//   "<kph>" : [["kph"], 0.277777778, "speed", ["<meter>"], ["<second>"]],
-//   "<mph>" : [["mph"], 0.44704, "speed", ["<meter>"], ["<second>"]],
-//   "<knot>" : [["kt","kn","kts","knot","knots"], 0.514444444, "speed", ["<meter>"], ["<second>"]],
-//   "<fps>"  : [["fps"], 0.3048, "speed", ["<meter>"], ["<second>"]],
-
-//   /* acceleration */
-//   "<gee>" : [["gee"], 9.80665, "acceleration", ["<meter>"], ["<second>","<second>"]],
-//   "<Gal>" : [["Gal"], 1e-2, "acceleration", ["<meter>"], ["<second>","<second>"]],
-
-//   /* temperature_difference */
-//   "<kelvin>" : [["degK","kelvin"], 1.0, "temperature", ["<kelvin>"]],
-//   "<celsius>" : [["degC","celsius","celsius","centigrade"], 1.0, "temperature", ["<kelvin>"]],
-//   "<fahrenheit>" : [["degF","fahrenheit"], 5 / 9, "temperature", ["<kelvin>"]],
-//   "<rankine>" : [["degR","rankine"], 5 / 9, "temperature", ["<kelvin>"]],
-//   "<temp-K>"  : [["tempK","temp-K"], 1.0, "temperature", ["<temp-K>"]],
-//   "<temp-C>"  : [["tempC","temp-C"], 1.0, "temperature", ["<temp-K>"]],
-//   "<temp-F>"  : [["tempF","temp-F"], 5 / 9, "temperature", ["<temp-K>"]],
-//   "<temp-R>"  : [["tempR","temp-R"], 5 / 9, "temperature", ["<temp-K>"]],
-
-//   /* time */
-//   "<second>":  [["s","sec","secs","second","seconds"], 1.0, "time", ["<second>"]],
-//   "<minute>":  [["min","mins","minute","minutes"], 60.0, "time", ["<second>"]],
-//   "<hour>":  [["h","hr","hrs","hour","hours"], 3600.0, "time", ["<second>"]],
-//   "<day>":  [["d","day","days"], 3600 * 24, "time", ["<second>"]],
-//   "<week>":  [["wk","week","weeks"], 7 * 3600 * 24, "time", ["<second>"]],
-//   "<fortnight>": [["fortnight","fortnights"], 1209600, "time", ["<second>"]],
-//   "<year>":  [["y","yr","year","years","annum"], 31556926, "time", ["<second>"]],
-//   "<decade>":[["decade","decades"], 315569260, "time", ["<second>"]],
-//   "<century>":[["century","centuries"], 3155692600, "time", ["<second>"]],
-
-//   /* pressure */
-//   "<pascal>" : [["Pa","pascal","Pascal"], 1.0, "pressure", ["<kilogram>"],["<meter>","<second>","<second>"]],
-//   "<bar>" : [["bar","bars"], 100000, "pressure", ["<kilogram>"],["<meter>","<second>","<second>"]],
-//   "<mmHg>" : [["mmHg"], 133.322368, "pressure", ["<kilogram>"],["<meter>","<second>","<second>"]],
-//   "<inHg>" : [["inHg"], 3386.3881472, "pressure", ["<kilogram>"],["<meter>","<second>","<second>"]],
-//   "<torr>" : [["torr"], 133.322368, "pressure", ["<kilogram>"],["<meter>","<second>","<second>"]],
-//   "<atm>" : [["atm","ATM","atmosphere","atmospheres"], 101325, "pressure", ["<kilogram>"],["<meter>","<second>","<second>"]],
-//   "<psi>" : [["psi"], 6894.76, "pressure", ["<kilogram>"],["<meter>","<second>","<second>"]],
-//   "<cmh2o>" : [["cmH2O","cmh2o"], 98.0638, "pressure", ["<kilogram>"],["<meter>","<second>","<second>"]],
-//   "<inh2o>" : [["inH2O","inh2o"], 249.082052, "pressure", ["<kilogram>"],["<meter>","<second>","<second>"]],
-
-//   /* viscosity */
-//   "<poise>"  : [["P","poise"], 0.1, "viscosity", ["<kilogram>"],["<meter>","<second>"] ],
-//   "<stokes>" : [["St","stokes"], 1e-4, "viscosity", ["<meter>","<meter>"], ["<second>"]],
-
-//   /* substance */
-//   "<mole>"  :  [["mol","mole"], 1.0, "substance", ["<mole>"]],
-
-//   /* molar_concentration */
-//   "<molar>" : [["M","molar"], 1000, "molar_concentration", ["<mole>"], ["<meter>","<meter>","<meter>"]],
-//   "<wtpercent>"  : [["wt%","wtpercent"], 10, "molar_concentration", ["<kilogram>"], ["<meter>","<meter>","<meter>"]],
-
-//   /* activity */
-//   "<katal>" :  [["kat","katal","Katal"], 1.0, "activity", ["<mole>"], ["<second>"]],
-//   "<unit>"  :  [["U","enzUnit","unit"], 16.667e-16, "activity", ["<mole>"], ["<second>"]],
-
-//   /* capacitance */
-//   "<farad>" :  [["F","farad","Farad"], 1.0, "capacitance", ["<second>","<second>","<second>","<second>","<ampere>","<ampere>"], ["<meter>", "<meter>", "<kilogram>"]],
-
-//   /* charge */
-//   "<coulomb>" :  [["C","coulomb","Coulomb"], 1.0, "charge", ["<ampere>","<second>"]],
-//   "<Ah>" :  [["Ah"], 3600, "charge", ["<ampere>","<second>"]],
-//   "<elementary-charge>" :  [["e"], 1.602176634e-19, "charge", ["<ampere>","<second>"]],
-
-//   /* current */
-//   "<ampere>"  :  [["A","Ampere","ampere","amp","amps"], 1.0, "current", ["<ampere>"]],
-
-//   /* conductance */
-//   "<siemens>" : [["S","Siemens","siemens"], 1.0, "conductance", ["<second>","<second>","<second>","<ampere>","<ampere>"], ["<kilogram>","<meter>","<meter>"]],
-
-//   /* inductance */
-//   "<henry>" :  [["H","Henry","henry"], 1.0, "inductance", ["<meter>","<meter>","<kilogram>"], ["<second>","<second>","<ampere>","<ampere>"]],
-
-//   /* potential */
-//   "<volt>"  :  [["V","Volt","volt","volts"], 1.0, "potential", ["<meter>","<meter>","<kilogram>"], ["<second>","<second>","<second>","<ampere>"]],
-
-//   /* resistance */
-//   "<ohm>" :  [
-//     ["Ohm","ohm","\u03A9"/*Ω as greek letter*/,"\u2126"/*Ω as ohm sign*/],
-//     1.0,
-//     "resistance",
-//     ["<meter>","<meter>","<kilogram>"],["<second>","<second>","<second>","<ampere>","<ampere>"]
-//   ],
-//   /* magnetism */
-//   "<weber>" : [["Wb","weber","webers"], 1.0, "magnetism", ["<meter>","<meter>","<kilogram>"], ["<second>","<second>","<ampere>"]],
-//   "<tesla>"  : [["T","tesla","teslas"], 1.0, "magnetism", ["<kilogram>"], ["<second>","<second>","<ampere>"]],
-//   "<gauss>" : [["G","gauss"], 1e-4, "magnetism",  ["<kilogram>"], ["<second>","<second>","<ampere>"]],
-//   "<maxwell>" : [["Mx","maxwell","maxwells"], 1e-8, "magnetism", ["<meter>","<meter>","<kilogram>"], ["<second>","<second>","<ampere>"]],
-//   "<oersted>"  : [["Oe","oersted","oersteds"], 250.0 / Math.PI, "magnetism", ["<ampere>"], ["<meter>"]],
 
 //   /* energy */
 //   "<joule>" :  [["J","joule","Joule","joules","Joules"], 1.0, "energy", ["<meter>","<meter>","<kilogram>"], ["<second>","<second>"]],
