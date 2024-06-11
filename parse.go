@@ -58,7 +58,7 @@ var parsedUnitsCache sync.Map
  * 6'4"  -- recognized as 6 feet + 4 inches
  * 8 lbs 8 oz -- recognized as 8 lbs + 8 ounces
  */
-func Parse(expr string) (Qty, error) {
+func ParseQty(expr string) (Qty, error) {
 	result := Qty{
 		scalar:      1,
 		numerator:   unityArray,

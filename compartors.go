@@ -3,16 +3,28 @@ package goqty
 import "fmt"
 
 func (q *Qty) Eq(other Qty) bool {
-	return q.CompareTo(other) == 0
+	if i, err := q.CompareTo(other); err == nil && i == 0 {
+		return true
+	} else {
+		return false
+	}
 }
 func (q *Qty) Lt(other Qty) bool {
-	return q.CompareTo(other) == -1
+	if i, err := q.CompareTo(other); err == nil && i == -1 {
+		return true
+	} else {
+		return false
+	}
 }
 func (q *Qty) Lte(other Qty) bool {
 	return q.Eq(other) || q.Lt(other)
 }
 func (q *Qty) Gt(other Qty) bool {
-	return q.CompareTo(other) == 1
+	if i, err := q.CompareTo(other); err == nil && i == 1 {
+		return true
+	} else {
+		return false
+	}
 }
 func (q *Qty) Gte(other Qty) bool {
 	return q.Eq(other) || q.Gt(other)
@@ -23,12 +35,12 @@ func (q *Qty) Gte(other Qty) bool {
 //
 // NOTE: We cannot compare inverses as that breaks the general compareTo contract:
 //
-//	if a.compareTo(b) < 0 then b.compareTo(a) > 0
-//	if a.compareTo(b) == 0 then b.compareTo(a) == 0
+//	if a.CompareTo(b) < 0 then b.CompareTo(a) > 0
+//	if a.CompareTo(b) == 0 then b.CompareTo(a) == 0
 //
 //	Since "10S" == ".1ohm" (10 > .1) and "10ohm" == ".1S" (10 > .1)
-//	  Qty("10S").inverse().compareTo("10ohm") == -1
-//	  Qty("10ohm").inverse().compareTo("10S") == -1
+//	  Qty("10S").Inverse().CompareTo(ParseQty("10ohm")) == -1
+//	  Qty("10ohm").Inverse().CompareTo(ParseQty("10S")) == -1
 //
 //	If including inverses in the sort is needed, I suggest writing: Qty.sort(qtyArray,units)
 func (q *Qty) CompareTo(other Qty) (int, error) {
@@ -37,10 +49,10 @@ func (q *Qty) CompareTo(other Qty) (int, error) {
 	}
 	if q.baseScalar < other.baseScalar {
 		return -1, nil
-	} else if q.baseScalar == other.baseScalar {
-		return 0, nil
 	} else if q.baseScalar > other.baseScalar {
 		return 1, nil
+	} else {
+		return 0, nil
 	}
 }
 

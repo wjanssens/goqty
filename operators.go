@@ -1,6 +1,8 @@
 package goqty
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func (q *Qty) Add(other Qty) (Qty, error) {
 	result := Qty{
@@ -43,7 +45,7 @@ func (q *Qty) Sub(other Qty) (Qty, error) {
 		return result, fmt.Errorf("Cannot subtract a temperature from a differential degree unit")
 	}
 
-	if to, err := other.To(q); err != nil {
+	if to, err := other.To(q.units); err != nil {
 		return result, err
 	} else {
 		return Qty{scalar: q.scalar - to.scalar, numerator: q.numerator, denominator: q.denominator}, nil
@@ -62,7 +64,7 @@ func (q *Qty) Mul(input interface{}) (Qty, error) {
 	case Qty:
 		other = input.(Qty)
 	case string:
-		if other, err := Parse(input.(string)); err != nil {
+		if other, err := ParseQty(input.(string)); err != nil {
 			return other, err
 		}
 	default:
@@ -120,7 +122,7 @@ func (q *Qty) Div(input interface{}) (Qty, error) {
 	case Qty:
 		other = input.(Qty)
 	case string:
-		if other, err := Parse(input.(string)); err != nil {
+		if other, err := ParseQty(input.(string)); err != nil {
 			return other, err
 		}
 	default:
@@ -170,7 +172,7 @@ func (q *Qty) Inverse() (Qty, error) {
 type combinedType struct {
 	dir    int
 	term   string
-	prefix Unit
+	prefix string
 	v1     float64
 	v2     float64
 }
@@ -189,21 +191,21 @@ func cleanTerms(num1, den1, num2, den2 []string) (num []string, den []string, sc
 
 	combineTerms := func(terms []string, direction int) {
 		var k string
-		var prefix Unit
+		var prefix string
 
 		for i, term := range terms {
-			if p, ok := prefixes[term]; ok {
+			if _, ok := prefixes[term]; ok {
 				k = terms[i+1]
-				prefix = p
+				prefix = term
 			} else {
 				k = term
-				prefix = unityUnit
+				prefix = unity
 			}
 			if k != "" && k != unity {
 				if c, ok := combined[k]; ok {
 					c.dir += direction
-					combinedPrefixValue := c.prefix.scalar
-					if v, err := divSafe(prefix.scalar, combinedPrefixValue); err != nil {
+					combinedPrefixValue := prefixes[c.prefix].scalar
+					if v, err := divSafe(prefixes[prefix].scalar, combinedPrefixValue); err != nil {
 						// TODO
 					} else if c.dir == 1 {
 						c.v1 *= v

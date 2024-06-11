@@ -143,10 +143,10 @@ func (q *Qty) ToPrec(precision Qty) (Qty, error) {
 func SwiftConverter(srcUnits, dstUnits string) (converter func(values []float64) ([]float64, error), err error) {
 	var srcQty Qty
 	var dstQty Qty
-	if srcQty, err = Parse(srcUnits); err != nil {
+	if srcQty, err = ParseQty(srcUnits); err != nil {
 		return converter, err
 	}
-	if dstQty, err = Parse(dstUnits); err != nil {
+	if dstQty, err = ParseQty(dstUnits); err != nil {
 		return converter, err
 	}
 
@@ -176,7 +176,7 @@ func SwiftConverter(srcUnits, dstUnits string) (converter func(values []float64)
 		}
 	}
 
-	converter = func(values []float64) ([]float64, error) {
+	return func(values []float64) ([]float64, error) {
 		result := make([]float64, len(values))
 		for _, v := range values {
 			if c, err := convert(v); err != nil {
@@ -186,8 +186,7 @@ func SwiftConverter(srcUnits, dstUnits string) (converter func(values []float64)
 			}
 		}
 		return result, nil
-	}
-
+	}, nil
 }
 
 func toBaseUnits(numerator, denominator []string) Qty {

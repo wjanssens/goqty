@@ -30,22 +30,44 @@ func subtractTemperatures(lhs, rhs Qty) (Qty, error) {
 	if err != nil {
 		return lhs, err
 	}
-	dstDegrees, err := Parse(dstDegreeUnits)
+	dstDegrees, err := ParseQty(dstDegreeUnits)
 	if err != nil {
 		return lhs, nil
 	}
 	return Qty{scalar: lhs.scalar - rhsConverted.scalar, numerator: dstDegrees.numerator, denominator: dstDegrees.denominator}, nil
 }
 
-// func subtractTempDegrees(temp,deg) {
-// 	var tempDegrees = deg.to(getDegreeUnits(temp.units()));
-// 	return Qty({"scalar": temp.scalar - tempDegrees.scalar, "numerator": temp.numerator, "denominator": temp.denominator});
-//   }
+func subtractTempDegrees(temp, deg Qty) (Qty, error) {
+	if units, err := getDegreeUnits(temp.Units()); err != nil {
+		return temp, err
+	} else {
+		if tempDegrees, err := deg.To(units); err != nil {
+			return temp, err
+		} else {
+			return Qty{
+				scalar:      temp.scalar - tempDegrees.scalar,
+				numerator:   temp.numerator,
+				denominator: temp.denominator,
+			}, nil
+		}
+	}
+}
 
-// func addTempDegrees(temp,deg) {
-// 	var tempDegrees = deg.to(getDegreeUnits(temp.units()));
-// 	return Qty({"scalar": temp.scalar + tempDegrees.scalar, "numerator": temp.numerator, "denominator": temp.denominator});
-//   }
+func addTempDegrees(temp, deg Qty) (Qty, error) {
+	if units, err := getDegreeUnits(temp.Units()); err != nil {
+		return temp, err
+	} else {
+		if tempDegrees, err := deg.To(units); err != nil {
+			return temp, err
+		} else {
+			return Qty{
+				scalar:      temp.scalar + tempDegrees.scalar,
+				numerator:   temp.numerator,
+				denominator: temp.denominator,
+			}, nil
+		}
+	}
+}
 
 func getDegreeUnits(units string) (string, error) {
 	switch units {

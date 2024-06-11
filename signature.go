@@ -7,24 +7,31 @@ import (
 
 var signatureTypes = []string{"length", "time", "temperature", "mass", "current", "substance", "luminosity", "currency", "information", "angle"}
 
-func (q *Qty) unitSignature() int {
+func (q *Qty) unitSignature() (int, error) {
 	if q.signature != 0 && !q.IsUnitless() {
-		return q.signature
+		return q.signature, nil
 	}
 
-	vector := q.unitSignatureVector()
-	for i, _ := range signatureTypes {
-		vector[i] *= int(math.Pow(20, float64(i)))
-	}
+	if vector, err := q.unitSignatureVector(); err != nil {
+		return q.signature, err
+	} else {
+		for i, _ := range signatureTypes {
+			vector[i] *= int(math.Pow(20, float64(i)))
+		}
 
-	return reduce(vector, func(prev, curr int) int {
-		return prev + curr
-	}, 0)
+		return reduce(vector, func(prev, curr int) int {
+			return prev + curr
+		}, 0), nil
+	}
 }
 
-func (q *Qty) unitSignatureVector() []int {
+func (q *Qty) unitSignatureVector() ([]int, error) {
 	if !q.IsBase() {
-		return q.ToBase().unitSignatureVector()
+		if b, err := q.ToBase(); err != nil {
+			return []int{}, err
+		} else {
+			return b.unitSignatureVector()
+		}
 	}
 
 	result := make([]int, len(signatureTypes))
@@ -45,5 +52,5 @@ func (q *Qty) unitSignatureVector() []int {
 			}
 		}
 	}
-	return result
+	return result, nil
 }

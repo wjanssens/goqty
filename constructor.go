@@ -22,7 +22,7 @@ func NewQty(scalar float64, units string) (Qty, error) {
 	}
 
 	if units != "" {
-		if q, err := Parse(units); err != nil {
+		if q, err := ParseQty(units); err != nil {
 			return result, err
 		} else {
 			result.numerator = q.numerator
