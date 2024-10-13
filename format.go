@@ -10,7 +10,7 @@ import (
 var stringifiedUnitsCache sync.Map
 
 func (q *Qty) Units() string {
-	if q.units == "" {
+	if q.units != "" {
 		return q.units
 	}
 
@@ -32,15 +32,16 @@ func (q *Qty) Units() string {
 }
 
 func StringifyUnits(units []string) string {
-	if cached, found := parsedUnitsCache.Load(units); found {
+	key := strings.Join(units, "|")
+	if cached, found := stringifiedUnitsCache.Load(key); found {
 		return cached.(string)
 	}
-	if isUnity := slices.Compare(units, unityArray) == 0; isUnity {
-		parsedUnitsCache.Store(units, "1")
+	if isUnity := slices.Equal(units, unityArray); isUnity {
+		stringifiedUnitsCache.Store(key, "1")
 		return "1"
 	} else {
 		result := strings.Join(simplify(getOutputNames(units)), "*")
-		parsedUnitsCache.Store(units, result)
+		stringifiedUnitsCache.Store(key, result)
 		return result
 	}
 }
@@ -49,8 +50,8 @@ func getOutputNames(units []string) []string {
 	result := []string{}
 	for i := 0; i < len(units); i++ {
 		token := units[i]
-		tokenNext := units[i+1]
 		if _, ok := prefixes[token]; ok {
+			tokenNext := units[i+1]
 			result = append(result, outputs[token]+outputs[tokenNext])
 			i++
 		} else {

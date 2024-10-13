@@ -81,7 +81,7 @@ func getDegreeUnits(units string) (string, error) {
 	case "tempR":
 		return "degR", nil
 	default:
-		return "", fmt.Errorf("Unknown type for temp conversion from: " + units)
+		return "", fmt.Errorf("unknown type for temp conversion from: %v", units)
 	}
 }
 
@@ -107,7 +107,7 @@ func ToDegrees(src, dst Qty) (Qty, error) {
 	case "degR":
 		dst.scalar = srcDegK.scalar * 9 / 5
 	default:
-		return result, fmt.Errorf("Unknown type for degree conversion to: " + dstUnits)
+		return result, fmt.Errorf("unknown type for degree conversion to: %v", dstUnits)
 	}
 	return result, nil
 }
@@ -133,7 +133,7 @@ func (q *Qty) ToDegK() (Qty, error) {
 		case "tempR":
 			result.scalar = q.scalar * 5 / 9
 		default:
-			return result, fmt.Errorf("Unknown type for temp conversion from: " + units)
+			return result, fmt.Errorf("unknown type for temp conversion from: %v", units)
 		}
 	}
 	return result, nil
@@ -152,11 +152,11 @@ func ToTemp(src, dst Qty) (Qty, error) {
 	case "tempC":
 		dst.scalar = src.baseScalar - 273.15
 	case "tempF":
-		dst.scalar = (src.baseScalar * 9 / 5) - 459.67
+		dst.scalar = (src.baseScalar * 9.0 / 5.0) - 459.67
 	case "tempR":
-		dst.scalar = src.baseScalar * 9 / 5
+		dst.scalar = src.baseScalar * 9.0 / 5.0
 	default:
-		return result, fmt.Errorf("Unknown type for temp conversion to: " + dstUnits)
+		return result, fmt.Errorf("unknown type for temp conversion to: %v", dstUnits)
 	}
 	return result, nil
 }
@@ -165,7 +165,7 @@ func (q *Qty) ToTempK() (Qty, error) {
 	var units = q.Units()
 
 	result := Qty{
-		numerator:   []string{"<kelvin>"},
+		numerator:   []string{"<temp-K>"},
 		denominator: unityArray,
 	}
 	re := regexp.MustCompile("(deg)[CFRK]")
@@ -182,7 +182,7 @@ func (q *Qty) ToTempK() (Qty, error) {
 		case "tempR":
 			result.scalar = q.scalar * 5 / 9
 		default:
-			return result, fmt.Errorf("Unknown type for temp conversion from: " + units)
+			return result, fmt.Errorf("unknown type for temp conversion from: %v", units)
 		}
 	}
 	return result, nil

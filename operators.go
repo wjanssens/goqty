@@ -56,11 +56,11 @@ func (q *Qty) Mul(input interface{}) (Qty, error) {
 	var other Qty
 	switch t := input.(type) {
 	case float64:
-		return NewQty(mulSafe(input.(float64), q.scalar), q.units)
+		return Qty{scalar: mulSafe(input.(float64), q.scalar), numerator: q.numerator, denominator: q.denominator}, nil
 	case float32:
-		return NewQty(mulSafe(float64(input.(float32)), q.scalar), q.units)
+		return Qty{scalar: mulSafe(float64(input.(float32)), q.scalar), numerator: q.numerator, denominator: q.denominator}, nil
 	case int:
-		return NewQty(mulSafe(float64(input.(int)), q.scalar), q.units)
+		return Qty{scalar: mulSafe(float64(input.(int)), q.scalar), numerator: q.numerator, denominator: q.denominator}, nil
 	case Qty:
 		other = input.(Qty)
 	case string:
@@ -68,11 +68,11 @@ func (q *Qty) Mul(input interface{}) (Qty, error) {
 			return other, err
 		}
 	default:
-		return Qty{}, fmt.Errorf("Cannot multiply type %T", t)
+		return Qty{}, fmt.Errorf("cannot multiply type %T", t)
 	}
 
 	if (q.IsTemperature() || other.IsTemperature()) && !(q.IsUnitless() || other.IsUnitless()) {
-		return Qty{}, fmt.Errorf("Cannot multiply by temperatures")
+		return Qty{}, fmt.Errorf("cannot multiply by temperatures")
 	}
 
 	// Quantities should be multiplied with same units if compatible, with base units else

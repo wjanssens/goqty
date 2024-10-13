@@ -9,10 +9,11 @@ type Unit struct {
 	numerator   []string
 	denominator []string
 }
-type NormalizedUnit struct {
-	prefix string // the unit name, eg. <meter>
-	unit   string
-}
+
+// type NormalizedUnit struct {
+// 	prefix string // the unit name, eg. <meter>
+// 	unit   string
+// }
 
 func makeUnit(kind string, aliases []string, scalar float64, numerator []string, denominator []string) Unit {
 	return Unit{kind, scalar, aliases, numerator, denominator}
@@ -150,12 +151,12 @@ var units = map[string]Unit{
 	// temperature_difference
 	"<kelvin>":     makeUnit("temperature", []string{"degK", "kelvin"}, 1.0, []string{"<kelvin>"}, nil),
 	"<celsius>":    makeUnit("temperature", []string{"degC", "celsius", "celsius", "centigrade"}, 1.0, []string{"<kelvin>"}, nil),
-	"<fahrenheit>": makeUnit("temperature", []string{"degF", "fahrenheit"}, 5/9, []string{"<kelvin>"}, nil),
-	"<rankine>":    makeUnit("temperature", []string{"degR", "rankine"}, 5/9, []string{"<kelvin>"}, nil),
+	"<fahrenheit>": makeUnit("temperature", []string{"degF", "fahrenheit"}, 5.0/9.0, []string{"<kelvin>"}, nil),
+	"<rankine>":    makeUnit("temperature", []string{"degR", "rankine"}, 5.0/9.0, []string{"<kelvin>"}, nil),
 	"<temp-K>":     makeUnit("temperature", []string{"tempK", "temp-K"}, 1.0, []string{"<temp-K>"}, nil),
 	"<temp-C>":     makeUnit("temperature", []string{"tempC", "temp-C"}, 1.0, []string{"<temp-K>"}, nil),
-	"<temp-F>":     makeUnit("temperature", []string{"tempF", "temp-F"}, 5/9, []string{"<temp-K>"}, nil),
-	"<temp-R>":     makeUnit("temperature", []string{"tempR", "temp-R"}, 5/9, []string{"<temp-K>"}, nil),
+	"<temp-F>":     makeUnit("temperature", []string{"tempF", "temp-F"}, 5.0/9.0, []string{"<temp-K>"}, nil),
+	"<temp-R>":     makeUnit("temperature", []string{"tempR", "temp-R"}, 5.0/9.0, []string{"<temp-K>"}, nil),
 
 	// pressure
 	"<pascal>": makeUnit("pressure", []string{"Pa", "pascal", "Pascal"}, 1.0, []string{"<kilogram>"}, []string{"<meter>", "<second>", "<second>"}),

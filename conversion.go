@@ -33,17 +33,14 @@ func (q *Qty) To(units string) (Qty, error) {
 		}
 	} else {
 		if target.IsTemperature() {
-			fmt.Println("isTemperature")
 			if target, err = ToTemp(*q, target); err != nil {
 				return target, err
 			}
 		} else if target.IsDegrees() {
-			fmt.Println("isDegree")
 			if target, err = ToDegrees(*q, target); err != nil {
 				return target, err
 			}
 		} else {
-			fmt.Println("else")
 			if scalar, err := divSafe(q.baseScalar, target.baseScalar); err != nil {
 				return target, nil
 			} else {
@@ -52,7 +49,6 @@ func (q *Qty) To(units string) (Qty, error) {
 		}
 	}
 
-	fmt.Printf("To %v, %v\n", units, target)
 	conversionCache.Store(units, target)
 	return target, nil
 }
@@ -218,14 +214,6 @@ func toBaseUnits(numerator, denominator []string) Qty {
 			den = append(den, unit.denominator...)
 		}
 	}
-
-	// // flatten
-	// num := reduce(nums, func(prev, curr []string) []string {
-	// 	return append(prev, curr...)
-	// }, []string{})
-	// den := reduce(dens, func(prev, curr []string) []string {
-	// 	return append(prev, curr...)
-	// }, []string{})
 
 	return Qty{scalar: q, numerator: num, denominator: den}
 }

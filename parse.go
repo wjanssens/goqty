@@ -42,7 +42,7 @@ var boundary = "\\b|$" // TODO \b only supports ASCII
 var unitMatch = "(" + prefix + ")??(" + unit + ")(?:" + boundary + ")"
 var unitTestRegex = regexp.MustCompile("^\\s*(" + unitMatch + "[\\s\\*]*)+$")
 
-var wsRegex = regexp.MustCompile("\\s")
+var wsRegex = regexp.MustCompile(`\\s`)
 
 var parsedUnitsCache sync.Map
 
@@ -81,7 +81,6 @@ func ParseQty(expr string) (Qty, error) {
 	} else {
 		result.scalar = 1
 	}
-	fmt.Printf("x %v %v\n", scalar, result.scalar)
 
 	var err error
 	var n int64
@@ -170,15 +169,14 @@ func parseUnits(units string) ([]string, error) {
 		return cached.([]string), nil
 	}
 
-	result := []string{}
 	matches := unitTestRegex.FindAllStringSubmatch(units, -1)
 	if len(matches) == 0 {
-		return result, fmt.Errorf("Unit not recognized")
+		return nil, fmt.Errorf("Unit not recognized")
 	}
-	for i := 0; i < len(matches); i++ {
-		match := matches[i]
-		prefix, hasPrefix := prefixesByAlias[match[0]]
-		unit, hasUnit := unitsByAlias[match[1]]
+	result := make([]string, 0)
+	for _, match := range matches {
+		prefix, hasPrefix := prefixesByAlias[match[2]]
+		unit, hasUnit := unitsByAlias[match[3]]
 
 		if hasPrefix && hasUnit {
 			result = append(result, prefix, unit)
