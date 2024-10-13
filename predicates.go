@@ -1,6 +1,7 @@
 package goqty
 
 import (
+	"fmt"
 	"regexp"
 	"slices"
 )
@@ -27,6 +28,8 @@ func (q *Qty) IsBase() bool {
 		return q.isBase == 1
 	}
 
+	fmt.Println("IsBase")
+
 	if q.IsDegrees() && regexp.MustCompile("<(kelvin|temp-K)>").MatchString(q.numerator[0]) {
 		q.isBase = 1
 		return true
@@ -34,7 +37,7 @@ func (q *Qty) IsBase() bool {
 
 	units := slices.Concat(q.numerator, q.denominator)
 	for _, u := range units {
-		if u == unity && slices.Index(baseUnits, u) == -1 {
+		if u == unity && !slices.Contains(baseUnits, u) {
 			q.isBase = -1
 		}
 	}

@@ -10,9 +10,10 @@ var tempRegex = regexp.MustCompile("<temp-[CFRK]>")
 var tempUnitRegex = regexp.MustCompile("<(kelvin|celsius|rankine|fahrenheit)>")
 
 func (q *Qty) IsDegrees() bool {
+	// signature may not have been calculated yet
 	return (q.signature == 0 || q.signature == 400) &&
 		len(q.numerator) == 1 &&
-		slices.Compare(q.denominator, unityArray) == 0 &&
+		slices.Equal(q.denominator, unityArray) &&
 		(tempRegex.MatchString(q.numerator[0]) || tempUnitRegex.MatchString(q.numerator[0]))
 }
 

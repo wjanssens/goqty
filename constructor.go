@@ -21,6 +21,9 @@ func NewQty(scalar float64, units string) (Qty, error) {
 		scalar: scalar,
 	}
 
+	result.numerator = unityArray
+	result.denominator = unityArray
+
 	if units != "" {
 		if q, err := ParseQty(units); err != nil {
 			return result, err
@@ -31,24 +34,34 @@ func NewQty(scalar float64, units string) (Qty, error) {
 	}
 
 	// math with temperatures is very limited
-	if strings.Index(strings.Join(result.denominator, "*"), "temp") >= 0 {
-		return result, fmt.Errorf("Cannot divide with temperatures")
+	if strings.Contains(strings.Join(result.denominator, "*"), "temp") {
+		return result, fmt.Errorf("cannot divide with temperatures")
 	}
-	if strings.Index(strings.Join(result.numerator, "*"), "temp") >= 0 {
+	if strings.Contains(strings.Join(result.numerator, "*"), "temp") {
 		if len(result.numerator) > 1 {
-			return result, fmt.Errorf("Cannot divide with temperatures")
+			return result, fmt.Errorf("cannot divide with temperatures")
 		}
 		if slices.Compare(result.denominator, unityArray) != 0 {
-			return result, fmt.Errorf("Cannot divide with temperatures")
+			return result, fmt.Errorf("cannot divide with temperatures")
 		}
 	}
 
 	result.updateBaseScalar()
 
 	if result.IsTemperature() && result.baseScalar < 0 {
-		return result, fmt.Errorf("Temperatures must not be less than absolute zero")
+		return result, fmt.Errorf("temperatures must not be less than absolute zero")
 	}
 	return result, nil
+}
+
+func (q *Qty) Scalar() float64 {
+	return q.scalar
+}
+func (q *Qty) Numerator() []string {
+	return q.numerator
+}
+func (q *Qty) Denominator() []string {
+	return q.denominator
 }
 
 func (q *Qty) updateBaseScalar() error {
@@ -57,7 +70,11 @@ func (q *Qty) updateBaseScalar() error {
 	// }
 	if q.IsBase() {
 		q.baseScalar = q.scalar
-		q.signature = q.unitSignature()
+		if signature, err := q.unitSignature(); err != nil {
+			return err
+		} else {
+			q.signature = signature
+		}
 	} else {
 		if base, err := q.ToBase(); err != nil {
 			return err

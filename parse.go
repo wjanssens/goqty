@@ -42,7 +42,7 @@ var boundary = "\\b|$" // TODO \b only supports ASCII
 var unitMatch = "(" + prefix + ")??(" + unit + ")(?:" + boundary + ")"
 var unitTestRegex = regexp.MustCompile("^\\s*(" + unitMatch + "[\\s\\*]*)+$")
 
-var wsRegex = regexp.MustCompile(`\\s`)
+var wsRegex = regexp.MustCompile("\\s")
 
 var parsedUnitsCache sync.Map
 
@@ -74,8 +74,14 @@ func ParseQty(expr string) (Qty, error) {
 	top := qtyMatches[2]
 	bottom := qtyMatches[3]
 
-	scalarMatch := wsRegex.ReplaceAllString(scalar, "")
-	result.scalar, _ = strconv.ParseFloat(scalarMatch, 64)
+	if scalar != "" {
+		// Allow whitespaces between sign and scalar for loose parsing
+		scalarMatch := wsRegex.ReplaceAllString(scalar, "")
+		result.scalar, _ = strconv.ParseFloat(scalarMatch, 64)
+	} else {
+		result.scalar = 1
+	}
+	fmt.Printf("x %v %v\n", scalar, result.scalar)
 
 	var err error
 	var n int64

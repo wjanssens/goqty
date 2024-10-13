@@ -29,18 +29,21 @@ func (q *Qty) To(units string) (Qty, error) {
 				return target, err
 			}
 		} else {
-			return target, fmt.Errorf("Incompatible Units")
+			return target, fmt.Errorf("incompatible Units")
 		}
 	} else {
 		if target.IsTemperature() {
+			fmt.Println("isTemperature")
 			if target, err = ToTemp(*q, target); err != nil {
 				return target, err
 			}
 		} else if target.IsDegrees() {
+			fmt.Println("isDegree")
 			if target, err = ToDegrees(*q, target); err != nil {
 				return target, err
 			}
 		} else {
+			fmt.Println("else")
 			if scalar, err := divSafe(q.baseScalar, target.baseScalar); err != nil {
 				return target, nil
 			} else {
@@ -49,6 +52,7 @@ func (q *Qty) To(units string) (Qty, error) {
 		}
 	}
 
+	fmt.Printf("To %v, %v\n", units, target)
 	conversionCache.Store(units, target)
 	return target, nil
 }
@@ -66,11 +70,10 @@ func (q *Qty) ToBase() (Qty, error) {
 	units := q.Units()
 	if cached, found := baseUnitCache.Load(units); found {
 		c := cached.(Qty)
-		NewQty(q.scalar, c.units)
 		return c.Mul(q.scalar)
 	} else {
 		base := toBaseUnits(q.numerator, q.denominator)
-		baseUnitCache.Store(units, cached)
+		baseUnitCache.Store(units, base)
 		return base.Mul(q.scalar)
 	}
 }
@@ -80,7 +83,7 @@ func (q *Qty) ToFloat() (float64, error) {
 	if q.IsUnitless() {
 		return q.scalar, nil
 	} else {
-		return q.scalar, fmt.Errorf("Can't convert to float unless unitless.  use Scalar()")
+		return q.scalar, fmt.Errorf("can't convert to float unless unitless.  use Scalar()")
 	}
 }
 
@@ -107,11 +110,11 @@ func (q *Qty) ToPrec(precision Qty) (Qty, error) {
 			return *q, err
 		}
 	} else if !precision.IsUnitless() {
-		return *q, fmt.Errorf("Incompatible Units %v, %v", q.Units(), precision.Units())
+		return *q, fmt.Errorf("incompatible Units %v, %v", q.Units(), precision.Units())
 	}
 
 	if precision.scalar == 0 {
-		return *q, fmt.Errorf("Divide by zero")
+		return *q, fmt.Errorf("divide by zero")
 	}
 
 	resultScalar := mulSafe(math.Round(q.scalar/precision.scalar), precision.scalar)
@@ -214,14 +217,14 @@ func toBaseUnits(numerator, denominator []string) Qty {
 			num = append(num, unit.numerator...)
 			den = append(den, unit.denominator...)
 		}
-
 	}
 
-	// num = reduce(num, func(a, b) {
-	// 	return slices.Concat(a, b)
+	// // flatten
+	// num := reduce(nums, func(prev, curr []string) []string {
+	// 	return append(prev, curr...)
 	// }, []string{})
-	// den = reduce(den, func(a, b) {
-	// 	return slices.Concat(a,b )
+	// den := reduce(dens, func(prev, curr []string) []string {
+	// 	return append(prev, curr...)
 	// }, []string{})
 
 	return Qty{scalar: q, numerator: num, denominator: den}
