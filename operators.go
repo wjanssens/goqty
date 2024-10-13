@@ -4,7 +4,23 @@ import (
 	"fmt"
 )
 
-func (q *Qty) Add(other *Qty) (*Qty, error) {
+func (q *Qty) Add(input interface{}) (*Qty, error) {
+	var other *Qty
+	var err error
+	switch t := input.(type) {
+	case Qty:
+		cast := input.(Qty)
+		other = &cast
+	case *Qty:
+		other = input.(*Qty)
+	case string:
+		if other, err = ParseQty(input.(string)); err != nil {
+			return nil, err
+		}
+	default:
+		return nil, fmt.Errorf("cannot add type %T", t)
+	}
+
 	if !q.IsCompatible(other) {
 		return nil, fmt.Errorf("incompatible Units %v, %v", q.Units(), other.Units())
 	}
@@ -22,7 +38,23 @@ func (q *Qty) Add(other *Qty) (*Qty, error) {
 	}
 }
 
-func (q *Qty) Sub(other *Qty) (*Qty, error) {
+func (q *Qty) Sub(input interface{}) (*Qty, error) {
+	var other *Qty
+	var err error
+	switch t := input.(type) {
+	case Qty:
+		cast := input.(Qty)
+		other = &cast
+	case *Qty:
+		other = input.(*Qty)
+	case string:
+		if other, err = ParseQty(input.(string)); err != nil {
+			return nil, err
+		}
+	default:
+		return nil, fmt.Errorf("cannot add type %T", t)
+	}
+
 	if !q.IsCompatible(other) {
 		return nil, fmt.Errorf("incompatible Units %v, %v", q.Units(), other.Units())
 	}

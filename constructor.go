@@ -42,7 +42,9 @@ func newQty(scalar float64, numerator []string, denominator []string) (*Qty, err
 		}
 	}
 
-	result.updateBaseScalar()
+	if err := result.updateBaseScalar(); err != nil {
+		return nil, err
+	}
 
 	if result.IsTemperature() && result.baseScalar < 0 {
 		return nil, fmt.Errorf("temperatures must not be less than absolute zero")
@@ -73,9 +75,6 @@ func (q *Qty) Denominator() []string {
 }
 
 func (q *Qty) updateBaseScalar() error {
-	// if q.baseScalar != 0 {
-	//   return q.baseScalar
-	// }
 	if q.IsBase() {
 		q.baseScalar = q.scalar
 		if signature, err := q.unitSignature(); err != nil {

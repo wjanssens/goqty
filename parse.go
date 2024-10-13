@@ -158,7 +158,7 @@ func ParseQty(expr string) (*Qty, error) {
 		}
 	}
 
-	return &result, nil
+	return newQty(result.scalar, result.numerator, result.denominator)
 }
 
 /* Parses and convers units string to normalized units array.
