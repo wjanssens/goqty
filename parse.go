@@ -58,7 +58,7 @@ var parsedUnitsCache sync.Map
  * 6'4"  -- recognized as 6 feet + 4 inches
  * 8 lbs 8 oz -- recognized as 8 lbs + 8 ounces
  */
-func ParseQty(expr string) (Qty, error) {
+func ParseQty(expr string) (*Qty, error) {
 	result := Qty{
 		scalar:      1,
 		numerator:   unityArray,
@@ -68,7 +68,7 @@ func ParseQty(expr string) (Qty, error) {
 	expr = strings.TrimSpace(expr)
 	qtyMatches := qtyStringRegex.FindStringSubmatch(expr)
 	if qtyMatches == nil {
-		return result, fmt.Errorf("%v: Quantity not recognized", expr)
+		return nil, fmt.Errorf("%v: Quantity not recognized", expr)
 	}
 	scalar := qtyMatches[1]
 	top := qtyMatches[2]
@@ -94,10 +94,10 @@ func ParseQty(expr string) (Qty, error) {
 		power := matches[2]
 
 		if n, err = strconv.ParseInt(power, 10, 8); err != nil {
-			return result, fmt.Errorf("Unit exponenent is not a number")
+			return nil, fmt.Errorf("unit exponenent is not a number")
 		}
 		if unitTestRegex.FindString(unit) == "" {
-			return result, fmt.Errorf("Unit is not recognized")
+			return nil, fmt.Errorf("unit is not recognized")
 		}
 		x = unit + " "
 		nx = ""
@@ -125,10 +125,10 @@ func ParseQty(expr string) (Qty, error) {
 		power := matches[2]
 
 		if n, err = strconv.ParseInt(power, 10, 8); err != nil {
-			return result, fmt.Errorf("unit exponenent is not a number")
+			return nil, fmt.Errorf("unit exponenent is not a number")
 		}
 		if unitTestRegex.FindString(unit) == "" {
-			return result, fmt.Errorf("unit is not recognized")
+			return nil, fmt.Errorf("unit is not recognized")
 		}
 		x = unit + " "
 		nx = ""
@@ -149,16 +149,16 @@ func ParseQty(expr string) (Qty, error) {
 
 	if top != "" {
 		if result.numerator, err = parseUnits(strings.TrimSpace(top)); err != nil {
-			return result, fmt.Errorf("unparsable numerator units")
+			return nil, fmt.Errorf("unparsable numerator units")
 		}
 	}
 	if bottom != "" {
 		if result.denominator, err = parseUnits(strings.TrimSpace(bottom)); err != nil {
-			return result, fmt.Errorf("unparsable denominator units")
+			return nil, fmt.Errorf("unparsable denominator units")
 		}
 	}
 
-	return result, nil
+	return &result, nil
 }
 
 /* Parses and convers units string to normalized units array.

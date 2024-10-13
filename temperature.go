@@ -21,51 +21,43 @@ func (q *Qty) IsTemperature() bool {
 	return q.IsDegrees() && tempRegex.MatchString(q.numerator[0])
 }
 
-func subtractTemperatures(lhs, rhs Qty) (Qty, error) {
+func subtractTemperatures(lhs, rhs *Qty) (*Qty, error) {
 	lhsUnits := lhs.Units()
 	rhsConverted, err := rhs.To(lhsUnits)
 	if err != nil {
-		return lhs, err
+		return nil, err
 	}
 	dstDegreeUnits, err := getDegreeUnits(lhsUnits)
 	if err != nil {
-		return lhs, err
+		return nil, err
 	}
 	dstDegrees, err := ParseQty(dstDegreeUnits)
 	if err != nil {
-		return lhs, nil
+		return nil, nil
 	}
-	return Qty{scalar: lhs.scalar - rhsConverted.scalar, numerator: dstDegrees.numerator, denominator: dstDegrees.denominator}, nil
+	return newQty(lhs.scalar-rhsConverted.scalar, dstDegrees.numerator, dstDegrees.denominator)
 }
 
-func subtractTempDegrees(temp, deg Qty) (Qty, error) {
+func subtractTempDegrees(temp, deg *Qty) (*Qty, error) {
 	if units, err := getDegreeUnits(temp.Units()); err != nil {
-		return temp, err
+		return nil, err
 	} else {
 		if tempDegrees, err := deg.To(units); err != nil {
-			return temp, err
+			return nil, err
 		} else {
-			return Qty{
-				scalar:      temp.scalar - tempDegrees.scalar,
-				numerator:   temp.numerator,
-				denominator: temp.denominator,
-			}, nil
+			return newQty(temp.scalar-tempDegrees.scalar, temp.numerator, temp.denominator)
 		}
 	}
 }
 
-func addTempDegrees(temp, deg Qty) (Qty, error) {
+func addTempDegrees(temp, deg *Qty) (*Qty, error) {
 	if units, err := getDegreeUnits(temp.Units()); err != nil {
-		return temp, err
+		return nil, err
 	} else {
 		if tempDegrees, err := deg.To(units); err != nil {
-			return temp, err
+			return nil, err
 		} else {
-			return Qty{
-				scalar:      temp.scalar + tempDegrees.scalar,
-				numerator:   temp.numerator,
-				denominator: temp.denominator,
-			}, nil
+			return newQty(temp.scalar+tempDegrees.scalar, temp.numerator, temp.denominator)
 		}
 	}
 }
@@ -85,15 +77,10 @@ func getDegreeUnits(units string) (string, error) {
 	}
 }
 
-func ToDegrees(src, dst Qty) (Qty, error) {
-	result := Qty{
-		numerator:   dst.numerator,
-		denominator: dst.denominator,
-	}
-
+func ToDegrees(src, dst *Qty) (*Qty, error) {
 	srcDegK, err := src.ToDegK()
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 	dstUnits := dst.Units()
 
@@ -107,83 +94,71 @@ func ToDegrees(src, dst Qty) (Qty, error) {
 	case "degR":
 		dst.scalar = srcDegK.scalar * 9 / 5
 	default:
-		return result, fmt.Errorf("unknown type for degree conversion to: %v", dstUnits)
+		return nil, fmt.Errorf("unknown type for degree conversion to: %v", dstUnits)
 	}
-	return result, nil
+	return newQty(dst.scalar, dst.numerator, dst.denominator)
 }
 
-func (q *Qty) ToDegK() (Qty, error) {
-	var units = q.Units()
-
-	result := Qty{
-		numerator:   []string{"<kelvin>"},
-		denominator: unityArray,
-	}
+func (q *Qty) ToDegK() (*Qty, error) {
+	var scalar float64
+	units := q.Units()
 	re := regexp.MustCompile("(deg)[CFRK]")
 	if re.MatchString(units) {
-		result.scalar = q.baseScalar
+		scalar = q.baseScalar
 	} else {
 		switch units {
 		case "tempK":
-			result.scalar = q.scalar
+			scalar = q.scalar
 		case "tempC":
-			result.scalar = q.scalar
+			scalar = q.scalar
 		case "tempF":
-			result.scalar = q.scalar * 5 / 9
+			scalar = q.scalar * 5 / 9
 		case "tempR":
-			result.scalar = q.scalar * 5 / 9
+			scalar = q.scalar * 5 / 9
 		default:
-			return result, fmt.Errorf("unknown type for temp conversion from: %v", units)
+			return nil, fmt.Errorf("unknown type for temp conversion from: %v", units)
 		}
 	}
-	return result, nil
+	return newQty(scalar, []string{"<kelvin>"}, unityArray)
 }
 
-func ToTemp(src, dst Qty) (Qty, error) {
+func ToTemp(src, dst *Qty) (*Qty, error) {
 	dstUnits := dst.Units()
-
-	result := Qty{
-		numerator:   dst.numerator,
-		denominator: dst.denominator,
-	}
+	var scalar float64
 	switch dstUnits {
 	case "tempK":
-		dst.scalar = src.baseScalar
+		scalar = src.baseScalar
 	case "tempC":
-		dst.scalar = src.baseScalar - 273.15
+		scalar = src.baseScalar - 273.15
 	case "tempF":
-		dst.scalar = (src.baseScalar * 9.0 / 5.0) - 459.67
+		scalar = (src.baseScalar * 9.0 / 5.0) - 459.67
 	case "tempR":
-		dst.scalar = src.baseScalar * 9.0 / 5.0
+		scalar = src.baseScalar * 9.0 / 5.0
 	default:
-		return result, fmt.Errorf("unknown type for temp conversion to: %v", dstUnits)
+		return nil, fmt.Errorf("unknown type for temp conversion to: %v", dstUnits)
 	}
-	return result, nil
+	return newQty(scalar, dst.numerator, dst.denominator)
 }
 
-func (q *Qty) ToTempK() (Qty, error) {
-	var units = q.Units()
-
-	result := Qty{
-		numerator:   []string{"<temp-K>"},
-		denominator: unityArray,
-	}
+func (q *Qty) ToTempK() (*Qty, error) {
+	units := q.Units()
+	var scalar float64
 	re := regexp.MustCompile("(deg)[CFRK]")
 	if re.MatchString(units) {
-		result.scalar = q.baseScalar
+		scalar = q.baseScalar
 	} else {
 		switch units {
 		case "tempK":
-			result.scalar = q.scalar
+			scalar = q.scalar
 		case "tempC":
-			result.scalar = q.scalar + 273.15
+			scalar = q.scalar + 273.15
 		case "tempF":
-			result.scalar = (q.scalar + 459.67) * 5 / 9
+			scalar = (q.scalar + 459.67) * 5 / 9
 		case "tempR":
-			result.scalar = q.scalar * 5 / 9
+			scalar = q.scalar * 5 / 9
 		default:
-			return result, fmt.Errorf("unknown type for temp conversion from: %v", units)
+			return nil, fmt.Errorf("unknown type for temp conversion from: %v", units)
 		}
 	}
-	return result, nil
+	return newQty(scalar, []string{"<temp-K>"}, unityArray)
 }

@@ -4,169 +4,165 @@ import (
 	"fmt"
 )
 
-func (q *Qty) Add(other Qty) (Qty, error) {
-	result := Qty{
-		numerator:   q.numerator,
-		denominator: q.denominator,
-	}
+func (q *Qty) Add(other *Qty) (*Qty, error) {
 	if !q.IsCompatible(other) {
-		return result, fmt.Errorf("Incompatible Units %v, %v", q.Units(), other.Units())
+		return nil, fmt.Errorf("incompatible Units %v, %v", q.Units(), other.Units())
 	}
 	if q.IsTemperature() && other.IsTemperature() {
-		return result, fmt.Errorf("Cannot add two temperatures")
+		return nil, fmt.Errorf("cannot add two temperatures")
 	} else if q.IsTemperature() {
-		return addTempDegrees(*q, other)
+		return addTempDegrees(q, other)
 	} else if other.IsTemperature() {
-		return addTempDegrees(other, *q)
+		return addTempDegrees(other, q)
 	}
 	if to, err := other.To(q.Units()); err != nil {
-		return result, err
+		return nil, err
 	} else {
-		result.scalar = q.scalar + to.scalar
+		return newQty(q.scalar+to.scalar, q.numerator, q.denominator)
 	}
-	return result, nil
 }
 
-func (q *Qty) Sub(other Qty) (Qty, error) {
-	result := Qty{
-		numerator:   q.numerator,
-		denominator: q.denominator,
-	}
-
+func (q *Qty) Sub(other *Qty) (*Qty, error) {
 	if !q.IsCompatible(other) {
-		return result, fmt.Errorf("Incompatible Units %v, %v", q.Units(), other.Units())
+		return nil, fmt.Errorf("incompatible Units %v, %v", q.Units(), other.Units())
 	}
 
 	if q.IsTemperature() && other.IsTemperature() {
-		return subtractTemperatures(*q, other)
+		return subtractTemperatures(q, other)
 	} else if q.IsTemperature() {
-		return subtractTempDegrees(*q, other)
+		return subtractTempDegrees(q, other)
 	} else if other.IsTemperature() {
-		return result, fmt.Errorf("Cannot subtract a temperature from a differential degree unit")
+		return nil, fmt.Errorf("cannot subtract a temperature from a differential degree unit")
 	}
 
 	if to, err := other.To(q.units); err != nil {
-		return result, err
+		return nil, err
 	} else {
-		return Qty{scalar: q.scalar - to.scalar, numerator: q.numerator, denominator: q.denominator}, nil
+		return newQty(q.scalar-to.scalar, q.numerator, q.denominator)
 	}
 }
 
-func (q *Qty) Mul(input interface{}) (Qty, error) {
-	var other Qty
+func (q *Qty) Mul(input interface{}) (*Qty, error) {
+	var other *Qty
+	var err error
 	switch t := input.(type) {
 	case float64:
-		return Qty{scalar: mulSafe(input.(float64), q.scalar), numerator: q.numerator, denominator: q.denominator}, nil
+		return newQty(mulSafe(input.(float64), q.scalar), q.numerator, q.denominator)
 	case float32:
-		return Qty{scalar: mulSafe(float64(input.(float32)), q.scalar), numerator: q.numerator, denominator: q.denominator}, nil
+		return newQty(mulSafe(float64(input.(float32)), q.scalar), q.numerator, q.denominator)
 	case int:
-		return Qty{scalar: mulSafe(float64(input.(int)), q.scalar), numerator: q.numerator, denominator: q.denominator}, nil
+		return newQty(mulSafe(float64(input.(int)), q.scalar), q.numerator, q.denominator)
 	case Qty:
-		other = input.(Qty)
+		cast := input.(Qty)
+		other = &cast
+	case *Qty:
+		other = input.(*Qty)
 	case string:
-		if other, err := ParseQty(input.(string)); err != nil {
-			return other, err
+		if other, err = ParseQty(input.(string)); err != nil {
+			return nil, err
 		}
 	default:
-		return Qty{}, fmt.Errorf("cannot multiply type %T", t)
+		return nil, fmt.Errorf("cannot multiply type %T", t)
 	}
 
 	if (q.IsTemperature() || other.IsTemperature()) && !(q.IsUnitless() || other.IsUnitless()) {
-		return Qty{}, fmt.Errorf("cannot multiply by temperatures")
+		return nil, fmt.Errorf("cannot multiply by temperatures")
 	}
 
 	// Quantities should be multiplied with same units if compatible, with base units else
 	op1 := q
 	op2 := other
-	var err error
 
 	// so as not to confuse results, multiplication and division between temperature degrees will maintain original unit info in num/den
 	// multiplication and division between deg[CFRK] can never factor each other out, only themselves: "degK*degC/degC^2" == "degK/degC"
 	if op1.IsCompatible(op2) && op1.signature != 400 {
 		if op2, err = op2.To(op1.units); err != nil {
-			return Qty{}, err
+			return nil, err
 		}
 	}
 	if num, den, scale, err := cleanTerms(op1.numerator, op1.denominator, op2.numerator, op2.denominator); err != nil {
-		return Qty{}, err
+		return nil, err
 	} else {
 		scalar := mulSafe(op1.scalar, op2.scalar, scale)
-		return Qty{scalar: scalar, numerator: num, denominator: den}, nil
+		return newQty(scalar, num, den)
 	}
 }
 
-func (q *Qty) Div(input interface{}) (Qty, error) {
-	var other Qty
+func (q *Qty) Div(input interface{}) (*Qty, error) {
+	var other *Qty
+	var err error
 	switch t := input.(type) {
 	case float64:
 		scalar := input.(float64)
-		if scalar = float64(input.(float64)); scalar == 0 {
-			return Qty{}, fmt.Errorf("Divide by zero")
+		if scalar == 0.0 {
+			return nil, fmt.Errorf("divide by zero")
 		} else {
-			return NewQty(q.scalar/scalar, q.units)
+			return newQty(q.scalar/scalar, q.numerator, q.denominator)
 		}
 	case float32:
-		scalar := float64(input.(float64))
-		if scalar = float64(input.(float64)); scalar == 0 {
-			return Qty{}, fmt.Errorf("Divide by zero")
+		scalar := float64(input.(float32))
+		if scalar == 0 {
+			return nil, fmt.Errorf("divide by zero")
 		} else {
-			return NewQty(q.scalar/scalar, q.units)
+			return newQty(q.scalar/scalar, q.numerator, q.denominator)
 		}
 	case int:
-		scalar := float64(input.(float64))
-		if scalar = float64(input.(float64)); scalar == 0 {
-			return Qty{}, fmt.Errorf("Divide by zero")
+		scalar := float64(input.(int))
+		if scalar == 0 {
+			return nil, fmt.Errorf("divide by zero")
 		} else {
-			return NewQty(q.scalar/scalar, q.units)
+			return newQty(q.scalar/scalar, q.numerator, q.denominator)
 		}
 	case Qty:
-		other = input.(Qty)
+		cast := input.(Qty)
+		other = &cast
+	case *Qty:
+		other = input.(*Qty)
 	case string:
-		if other, err := ParseQty(input.(string)); err != nil {
-			return other, err
+		if other, err = ParseQty(input.(string)); err != nil {
+			return nil, err
 		}
 	default:
-		return Qty{}, fmt.Errorf("Cannot multiply type %T", t)
+		return nil, fmt.Errorf("cannot multiply type %T", t)
 	}
 
 	if other.scalar == 0 {
-		return Qty{}, fmt.Errorf("Divide by zero")
+		return nil, fmt.Errorf("divide by zero")
 	}
 
 	if other.IsTemperature() {
-		return Qty{}, fmt.Errorf("Cannot divide with temperatures")
+		return nil, fmt.Errorf("cannot divide with temperatures")
 	} else if q.IsTemperature() && !other.IsUnitless() {
-		return Qty{}, fmt.Errorf("Cannot divide with temperatures")
+		return nil, fmt.Errorf("cannot divide with temperatures")
 	}
 
 	// Quantities should be multiplied with same units if compatible, with base units else
 	op1 := q
 	op2 := other
-	var err error
 
 	// so as not to confuse results, multiplication and division between temperature degrees will maintain original unit info in num/den
 	// multiplication and division between deg[CFRK] can never factor each other out, only themselves: "degK*degC/degC^2" == "degK/degC"
 	if op1.IsCompatible(op2) && op1.signature != 400 {
 		if op2, err = op2.To(op1.units); err != nil {
-			return Qty{}, err
+			return nil, err
 		}
 	}
 	if num, den, scale, err := cleanTerms(op1.numerator, op1.denominator, op2.denominator, op2.numerator); err != nil {
-		return Qty{}, err
+		return nil, err
 	} else {
-		return Qty{scalar: mulSafe(op1.scalar, scale) / op2.scalar, numerator: num, denominator: den}, nil
+		return newQty(mulSafe(op1.scalar, scale)/op2.scalar, num, den)
 	}
 }
 
 // // Returns a Qty that is the inverse of this Qty,
-func (q *Qty) Inverse() (Qty, error) {
+func (q *Qty) Inverse() (*Qty, error) {
 	if q.IsTemperature() {
-		return *q, fmt.Errorf("Cannot divide with temperatures")
+		return nil, fmt.Errorf("cannot divide with temperatures")
 	}
 	if q.scalar == 0 {
-		return *q, fmt.Errorf("Divide by zero")
+		return nil, fmt.Errorf("divide by zero")
 	}
-	return Qty{scalar: 1 / q.scalar, numerator: q.denominator, denominator: q.numerator}, nil
+	return newQty(1/q.scalar, q.denominator, q.numerator)
 }
 
 type combinedType struct {

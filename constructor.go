@@ -16,42 +16,50 @@ type Qty struct {
 	isBase      int
 }
 
-func NewQty(scalar float64, units string) (Qty, error) {
+func newQty(scalar float64, numerator []string, denominator []string) (*Qty, error) {
 	result := Qty{
-		scalar: scalar,
+		scalar:      scalar,
+		numerator:   numerator,
+		denominator: denominator,
 	}
-
-	result.numerator = unityArray
-	result.denominator = unityArray
-
-	if units != "" {
-		if q, err := ParseQty(units); err != nil {
-			return result, err
-		} else {
-			result.numerator = q.numerator
-			result.denominator = q.denominator
-		}
+	if len(numerator) == 0 {
+		result.numerator = unityArray
+	}
+	if len(denominator) == 0 {
+		result.denominator = unityArray
 	}
 
 	// math with temperatures is very limited
 	if strings.Contains(strings.Join(result.denominator, "*"), "temp") {
-		return result, fmt.Errorf("cannot divide with temperatures")
+		return nil, fmt.Errorf("cannot divide with temperatures")
 	}
 	if strings.Contains(strings.Join(result.numerator, "*"), "temp") {
 		if len(result.numerator) > 1 {
-			return result, fmt.Errorf("cannot divide with temperatures")
+			return nil, fmt.Errorf("cannot divide with temperatures")
 		}
 		if slices.Compare(result.denominator, unityArray) != 0 {
-			return result, fmt.Errorf("cannot divide with temperatures")
+			return nil, fmt.Errorf("cannot divide with temperatures")
 		}
 	}
 
 	result.updateBaseScalar()
 
 	if result.IsTemperature() && result.baseScalar < 0 {
-		return result, fmt.Errorf("temperatures must not be less than absolute zero")
+		return nil, fmt.Errorf("temperatures must not be less than absolute zero")
 	}
-	return result, nil
+	return &result, nil
+
+}
+func NewQty(scalar float64, units string) (*Qty, error) {
+	if units != "" {
+		if q, err := ParseQty(units); err != nil {
+			return nil, err
+		} else {
+			return newQty(scalar, q.numerator, q.denominator)
+		}
+	} else {
+		return newQty(scalar, unityArray, unityArray)
+	}
 }
 
 func (q *Qty) Scalar() float64 {

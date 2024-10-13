@@ -10,11 +10,11 @@ func (q *Qty) IsUnitless() bool {
 		slices.Compare(q.denominator, unityArray) == 0
 }
 
-func (q *Qty) IsCompatible(other Qty) bool {
+func (q *Qty) IsCompatible(other *Qty) bool {
 	return q.signature == other.signature
 }
 
-func (q *Qty) IsInverse(other Qty) bool {
+func (q *Qty) IsInverse(other *Qty) bool {
 	if i, err := q.Inverse(); err != nil {
 		return false
 	} else {

@@ -9,9 +9,10 @@ import (
 var conversionCache sync.Map
 var baseUnitCache sync.Map
 
-func (q *Qty) To(units string) (Qty, error) {
+func (q *Qty) To(units string) (*Qty, error) {
 	if cached, found := conversionCache.Load(units); found {
-		return cached.(Qty), nil
+		result := cached.(*Qty)
+		return result, nil
 	}
 
 	// Instantiating target to normalize units
@@ -19,7 +20,7 @@ func (q *Qty) To(units string) (Qty, error) {
 	if err != nil {
 		return target, err
 	} else if target.Units() == q.Units() {
-		return *q, nil
+		return q, nil
 	}
 
 	if !q.IsCompatible(target) {
@@ -33,18 +34,20 @@ func (q *Qty) To(units string) (Qty, error) {
 		}
 	} else {
 		if target.IsTemperature() {
-			if target, err = ToTemp(*q, target); err != nil {
+			if target, err = ToTemp(q, target); err != nil {
 				return target, err
 			}
 		} else if target.IsDegrees() {
-			if target, err = ToDegrees(*q, target); err != nil {
+			if target, err = ToDegrees(q, target); err != nil {
 				return target, err
 			}
 		} else {
 			if scalar, err := divSafe(q.baseScalar, target.baseScalar); err != nil {
-				return target, nil
+				return nil, err
 			} else {
-				target = Qty{scalar: scalar, numerator: target.numerator, denominator: target.denominator}
+				if target, err = newQty(scalar, target.numerator, target.denominator); err != nil {
+					return nil, err
+				}
 			}
 		}
 	}
@@ -55,9 +58,9 @@ func (q *Qty) To(units string) (Qty, error) {
 
 // convert to base SI units
 // results of the conversion are cached so subsequent calls to this will be fast
-func (q *Qty) ToBase() (Qty, error) {
+func (q *Qty) ToBase() (*Qty, error) {
 	if q.IsBase() {
-		return *q, nil
+		return q, nil
 	}
 	if q.IsTemperature() {
 		return q.ToTempK()
@@ -65,12 +68,15 @@ func (q *Qty) ToBase() (Qty, error) {
 
 	units := q.Units()
 	if cached, found := baseUnitCache.Load(units); found {
-		c := cached.(Qty)
+		c := cached.(*Qty)
 		return c.Mul(q.scalar)
 	} else {
-		base := toBaseUnits(q.numerator, q.denominator)
-		baseUnitCache.Store(units, base)
-		return base.Mul(q.scalar)
+		if base, err := toBaseUnits(q.numerator, q.denominator); err != nil {
+			return nil, err
+		} else {
+			baseUnitCache.Store(units, base)
+			return base.Mul(q.scalar)
+		}
 	}
 }
 
@@ -99,18 +105,18 @@ func (q *Qty) ToFloat() (float64, error) {
  * Qty('1.146 MPa').toPrec('0.1 bar'); // returns 1.15 MPa
  *
  */
-func (q *Qty) ToPrec(precision Qty) (Qty, error) {
+func (q *Qty) ToPrec(precision *Qty) (*Qty, error) {
 	var err error
 	if !q.IsUnitless() {
 		if precision, err = precision.To(q.Units()); err != nil {
-			return *q, err
+			return nil, err
 		}
 	} else if !precision.IsUnitless() {
-		return *q, fmt.Errorf("incompatible Units %v, %v", q.Units(), precision.Units())
+		return nil, fmt.Errorf("incompatible Units %v, %v", q.Units(), precision.Units())
 	}
 
 	if precision.scalar == 0 {
-		return *q, fmt.Errorf("divide by zero")
+		return nil, fmt.Errorf("divide by zero")
 	}
 
 	resultScalar := mulSafe(math.Round(q.scalar/precision.scalar), precision.scalar)
@@ -140,8 +146,8 @@ func (q *Qty) ToPrec(precision Qty) (Qty, error) {
  * var convertedSerie = largeSerie.map(converter);
  */
 func SwiftConverter(srcUnits, dstUnits string) (converter func(values []float64) ([]float64, error), err error) {
-	var srcQty Qty
-	var dstQty Qty
+	var srcQty *Qty
+	var dstQty *Qty
 	if srcQty, err = ParseQty(srcUnits); err != nil {
 		return converter, err
 	}
@@ -188,7 +194,7 @@ func SwiftConverter(srcUnits, dstUnits string) (converter func(values []float64)
 	}, nil
 }
 
-func toBaseUnits(numerator, denominator []string) Qty {
+func toBaseUnits(numerator, denominator []string) (*Qty, error) {
 	num := []string{}
 	den := []string{}
 	q := float64(1)
@@ -215,5 +221,5 @@ func toBaseUnits(numerator, denominator []string) Qty {
 		}
 	}
 
-	return Qty{scalar: q, numerator: num, denominator: den}
+	return newQty(q, num, den)
 }

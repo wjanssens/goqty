@@ -12,7 +12,7 @@ func TestNewUnitless(t *testing.T) {
 	}
 	float, err := qty.ToFloat()
 	if err != nil {
-		t.Errorf("failed to convert to float")
+		t.Errorf("failed to convert to float: %v", err)
 	}
 	if float != 1.5 {
 		t.Errorf("expected float %v, got %v", 1.5, float)

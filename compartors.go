@@ -2,31 +2,31 @@ package goqty
 
 import "fmt"
 
-func (q *Qty) Eq(other Qty) bool {
+func (q *Qty) Eq(other *Qty) bool {
 	if i, err := q.CompareTo(other); err == nil && i == 0 {
 		return true
 	} else {
 		return false
 	}
 }
-func (q *Qty) Lt(other Qty) bool {
+func (q *Qty) Lt(other *Qty) bool {
 	if i, err := q.CompareTo(other); err == nil && i == -1 {
 		return true
 	} else {
 		return false
 	}
 }
-func (q *Qty) Lte(other Qty) bool {
+func (q *Qty) Lte(other *Qty) bool {
 	return q.Eq(other) || q.Lt(other)
 }
-func (q *Qty) Gt(other Qty) bool {
+func (q *Qty) Gt(other *Qty) bool {
 	if i, err := q.CompareTo(other); err == nil && i == 1 {
 		return true
 	} else {
 		return false
 	}
 }
-func (q *Qty) Gte(other Qty) bool {
+func (q *Qty) Gte(other *Qty) bool {
 	return q.Eq(other) || q.Gt(other)
 }
 
@@ -43,7 +43,7 @@ func (q *Qty) Gte(other Qty) bool {
 //	  Qty("10ohm").Inverse().CompareTo(ParseQty("10S")) == -1
 //
 //	If including inverses in the sort is needed, I suggest writing: Qty.sort(qtyArray,units)
-func (q *Qty) CompareTo(other Qty) (int, error) {
+func (q *Qty) CompareTo(other *Qty) (int, error) {
 	if !q.IsCompatible(other) {
 		return 0, fmt.Errorf("Incompatible Units %v %v", q.units, other.units)
 	}
