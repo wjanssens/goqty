@@ -26,7 +26,7 @@ const float = "(?:" + integer + "(?:" + fraction + ")?" + ")" +
 const exponent = "[Ee]" + signedInteger
 const sciNumber = "(?:" + float + ")(?:" + exponent + ")?"
 const signedNumber = sign + "?\\s*" + sciNumber
-const qtyString = "(" + signedNumber + ")?" + "\\s*([^/]*)(?:/(.+))?"
+const qtyString = "(" + signedNumber + ")?\\s*([^/]*)(?:/(.+))?"
 
 var qtyStringRegex = regexp.MustCompile("^" + qtyString + "$")
 
@@ -34,13 +34,15 @@ const powerOp = "\\^|\\*{2}"
 const safePower = "[01234]"
 
 var topRegex = regexp.MustCompile("([^ \\*\\d]+?)(?:" + powerOp + ")?(-?" + safePower + ")")
+var notTopRegex = regexp.MustCompile("([^ \\*\\d]+?)(?:" + powerOp + ")?(-?" + safePower + "([a-zA-Z]))")
 var bottomRegex = regexp.MustCompile("([^ \\*\\d]+?)(?:" + powerOp + ")?(" + safePower + ")")
+var notBottomRegex = regexp.MustCompile("([^ \\*\\d]+?)(?:" + powerOp + ")?(" + safePower + "([a-zA-Z]))")
 
 var prefix = re(prefixesByAlias)
 var unit = re(unitsByAlias)
 var boundary = "\\b|$" // TODO \b only supports ASCII
 var unitMatch = "(" + prefix + ")??(" + unit + ")(?:" + boundary + ")"
-var unitTestRegex = regexp.MustCompile("^\\s*(" + unitMatch + "[\\s\\*]*)+$")
+var unitTestRegex = regexp.MustCompile("\\s*(" + unitMatch + "[\\s\\*]*)")
 
 var wsRegex = regexp.MustCompile(`\\s`)
 
@@ -90,6 +92,9 @@ func ParseQty(expr string) (*Qty, error) {
 		if matches == nil {
 			break
 		}
+		if m := notTopRegex.FindStringSubmatch(top); m != nil {
+			break
+		}
 		unit := matches[1]
 		power := matches[2]
 
@@ -119,6 +124,9 @@ func ParseQty(expr string) (*Qty, error) {
 	for {
 		matches := bottomRegex.FindStringSubmatch(bottom)
 		if matches == nil {
+			break
+		}
+		if m := notBottomRegex.FindStringSubmatch(bottom); m != nil {
 			break
 		}
 		unit := matches[1]
@@ -171,7 +179,7 @@ func parseUnits(units string) ([]string, error) {
 
 	matches := unitTestRegex.FindAllStringSubmatch(units, -1)
 	if len(matches) == 0 {
-		return nil, fmt.Errorf("Unit not recognized")
+		return nil, fmt.Errorf("unit not recognized")
 	}
 	result := make([]string, 0)
 	for _, match := range matches {
@@ -196,7 +204,7 @@ func re(unitsByAlias map[string]string) string {
 		i++
 	}
 	sort.SliceStable(keys, func(i int, j int) bool {
-		return len(keys[i]) < len(keys[j])
+		return len(keys[i]) > len(keys[j])
 	})
 	return strings.Join(keys, "|")
 }

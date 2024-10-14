@@ -208,6 +208,26 @@ var units = map[string]Unit{
 	"<gauss>":   makeUnit("magnetism", []string{"G", "gauss"}, 1e-4, []string{"<kilogram>"}, []string{"<second>", "<second>", "<ampere>"}),
 	"<maxwell>": makeUnit("magnetism", []string{"Mx", "maxwell", "maxwells"}, 1e-8, []string{"<meter>", "<meter>", "<kilogram>"}, []string{"<second>", "<second>", "<ampere>"}),
 	"<oersted>": makeUnit("magnetism", []string{"Oe", "oersted", "oersteds"}, 250.0/math.Pi, []string{"<ampere>"}, []string{"<meter>"}),
+
+	// energy
+	"<joule>":        makeUnit("energy", []string{"J", "joule", "Joule", "joules", "Joules"}, 1.0, []string{"<meter>", "<meter>", "<kilogram>"}, []string{"<second>", "<second>"}),
+	"<erg>":          makeUnit("energy", []string{"erg", "ergs"}, 1e-7, []string{"<meter>", "<meter>", "<kilogram>"}, []string{"<second>", "<second>"}),
+	"<btu>":          makeUnit("energy", []string{"BTU", "btu", "BTUs"}, 1055.056, []string{"<meter>", "<meter>", "<kilogram>"}, []string{"<second>", "<second>"}),
+	"<calorie>":      makeUnit("energy", []string{"cal", "calorie", "calories"}, 4.18400, []string{"<meter>", "<meter>", "<kilogram>"}, []string{"<second>", "<second>"}),
+	"<Calorie>":      makeUnit("energy", []string{"Cal", "Calorie", "Calories"}, 4184.00, []string{"<meter>", "<meter>", "<kilogram>"}, []string{"<second>", "<second>"}),
+	"<therm-US>":     makeUnit("energy", []string{"th", "therm", "therms", "Therm", "therm-US"}, 105480400, []string{"<meter>", "<meter>", "<kilogram>"}, []string{"<second>", "<second>"}),
+	"<Wh>":           makeUnit("energy", []string{"Wh"}, 3600, []string{"<meter>", "<meter>", "<kilogram>"}, []string{"<second>", "<second>"}),
+	"<electronvolt>": makeUnit("energy", []string{"eV", "electronvolt", "electronvolts"}, 1.602176634e-19, []string{"<meter>", "<meter>", "<kilogram>"}, []string{"<second>", "<second>"}),
+
+	// force
+	"<newton>":         makeUnit("force", []string{"N", "Newton", "newton"}, 1.0, []string{"<kilogram>", "<meter>"}, []string{"<second>", "<second>"}),
+	"<dyne>":           makeUnit("force", []string{"dyn", "dyne"}, 1e-5, []string{"<kilogram>", "<meter>"}, []string{"<second>", "<second>"}),
+	"<pound-force>":    makeUnit("force", []string{"lbf", "pound-force"}, 4.448222, []string{"<kilogram>", "<meter>"}, []string{"<second>", "<second>"}),
+	"<kilogram-force>": makeUnit("force", []string{"kgf", "kilogram-force", "kilopond", "kp"}, 9.80665, []string{"<kilogram>", "<meter>"}, []string{"<second>", "<second>"}),
+	"<gram-force>":     makeUnit("force", []string{"gf", "gram-force"}, 9.80665e-3, []string{"<kilogram>", "<meter>"}, []string{"<second>", "<second>"}),
+
+	// frequency
+	"<hertz>": makeUnit("frequency", []string{"Hz", "hertz", "Hertz"}, 1.0, []string{"<1>"}, []string{"<second>"}),
 }
 var unitsByAlias = makeUnitAliasMap(units)
 
@@ -216,26 +236,6 @@ var outputs = makeOutputsMap(units)
 var baseUnits = []string{"<meter>", "<kilogram>", "<second>", "<mole>", "<ampere>", "<radian>", "<kelvin>", "<temp-K>", "<byte>", "<dollar>", "<candela>", "<each>", "<steradian>", "<decibel>"}
 
 // export var UNITS = {
-
-//   /* energy */
-//   "<joule>" :  [["J","joule","Joule","joules","Joules"], 1.0, "energy", ["<meter>","<meter>","<kilogram>"], ["<second>","<second>"]],
-//   "<erg>"   :  [["erg","ergs"], 1e-7, "energy", ["<meter>","<meter>","<kilogram>"], ["<second>","<second>"]],
-//   "<btu>"   :  [["BTU","btu","BTUs"], 1055.056, "energy", ["<meter>","<meter>","<kilogram>"], ["<second>","<second>"]],
-//   "<calorie>" :  [["cal","calorie","calories"], 4.18400, "energy",["<meter>","<meter>","<kilogram>"], ["<second>","<second>"]],
-//   "<Calorie>" :  [["Cal","Calorie","Calories"], 4184.00, "energy",["<meter>","<meter>","<kilogram>"], ["<second>","<second>"]],
-//   "<therm-US>" : [["th","therm","therms","Therm","therm-US"], 105480400, "energy",["<meter>","<meter>","<kilogram>"], ["<second>","<second>"]],
-//   "<Wh>" : [["Wh"], 3600, "energy",["<meter>","<meter>","<kilogram>"], ["<second>","<second>"]],
-//   "<electronvolt>" : [["eV", "electronvolt", "electronvolts"], 1.602176634E-19, "energy", ["<meter>","<meter>","<kilogram>"], ["<second>","<second>"]],
-
-//   /* force */
-//   "<newton>"  : [["N","Newton","newton"], 1.0, "force", ["<kilogram>","<meter>"], ["<second>","<second>"]],
-//   "<dyne>"  : [["dyn","dyne"], 1e-5, "force", ["<kilogram>","<meter>"], ["<second>","<second>"]],
-//   "<pound-force>"  : [["lbf","pound-force"], 4.448222, "force", ["<kilogram>","<meter>"], ["<second>","<second>"]],
-//   "<kilogram-force>"  : [["kgf","kilogram-force", "kilopond", "kp"], 9.80665, "force", ["<kilogram>","<meter>"], ["<second>","<second>"]],
-//   "<gram-force>"  : [["gf","gram-force"], 9.80665E-3, "force", ["<kilogram>","<meter>"], ["<second>","<second>"]],
-
-//   /* frequency */
-//   "<hertz>" : [["Hz","hertz","Hertz"], 1.0, "frequency", ["<1>"], ["<second>"]],
 
 //   /* angle */
 //   "<radian>" :[["rad","radian","radians"], 1.0, "angle", ["<radian>"]],
