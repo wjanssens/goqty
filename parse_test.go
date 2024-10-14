@@ -55,3 +55,56 @@ func TestParseUnitless(t *testing.T) {
 		t.Errorf("expected denominator %v, got %v", expected, qty.denominator)
 	}
 }
+
+func TestNonASCIICharacter(t *testing.T) {
+	var qty *Qty
+	var expected *Qty
+	var err error
+
+	expected, err = ParseQty("1 um")
+	if err != nil {
+		t.Errorf("failed to parse '1 um', got %v", err)
+	}
+
+	// greek letter
+	qty, err = ParseQty("1 \u03BCm")
+	if err != nil {
+		t.Errorf("failed to parse '1 \u03BCm', got %v", err)
+	} else {
+		if !qty.Eq(expected) {
+			t.Errorf("expected %v, got %v", expected, qty)
+		}
+	}
+	// micro sign
+	qty, err = ParseQty("1 \u00B5m")
+	if err != nil {
+		t.Errorf("failed to parse '1 \u03BCm', got %v", err)
+	} else {
+		if !qty.Eq(expected) {
+			t.Errorf("expected %v, got %v", expected, qty)
+		}
+	}
+	expected, err = ParseQty("1 ohm")
+	if err != nil {
+		t.Errorf("failed to parse '1 ohm', got %v", err)
+	}
+
+	// greek letter
+	qty, err = ParseQty("1 \u03A9")
+	if err != nil {
+		t.Errorf("failed to parse '1 \u03BCm', got %v", err)
+	} else {
+		if !qty.Eq(expected) {
+			t.Errorf("expected %v, got %v", expected, qty)
+		}
+	}
+	// ohm sign
+	qty, err = ParseQty("1 \u2126")
+	if err != nil {
+		t.Errorf("failed to parse '1 \u03BCm', got %v", err)
+	} else {
+		if !qty.Eq(expected) {
+			t.Errorf("expected %v, got %v", expected, qty)
+		}
+	}
+}
