@@ -444,5 +444,8 @@ func makeOutputsMap(units map[string]Unit) map[string]string {
 	for name, unit := range units {
 		result[name] = unit.aliases[0]
 	}
+	for name, prefix := range prefixes {
+		result[name] = prefix.aliases[0]
+	}
 	return result
 }

@@ -3,6 +3,7 @@ package goqty
 import (
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -29,6 +30,43 @@ func (q *Qty) Units() string {
 		q.units = numUnits + "/" + denUnits
 	}
 	return q.units
+}
+
+func (q *Qty) String() string {
+	return DefaultFormatter(q.scalar, q.Units())
+}
+
+type Formatter func(scalar float64, units string) string
+
+func DefaultFormatter(scalar float64, units string) string {
+	return strings.TrimSpace(fmt.Sprintf("%v %v", strconv.FormatFloat(scalar, 'f', -1, 64), units))
+}
+
+type FormattingOptions struct {
+	TargetUnits *string
+	Formatter   *Formatter
+	Precision   int
+}
+
+func (q *Qty) Format(opts *FormattingOptions) (string, error) {
+	if opts == nil {
+		opts = &FormattingOptions{nil, nil, -1}
+	}
+	var target *Qty
+	var err error
+	if opts.TargetUnits != nil {
+		if target, err = q.To(*opts.TargetUnits); target != nil {
+			return "", err
+		}
+	} else {
+		target = q
+	}
+	if opts.Formatter != nil {
+		fn := *opts.Formatter
+		return fn(target.scalar, target.Units()), nil
+	} else {
+		return strings.TrimSpace(fmt.Sprintf("%v %v", strconv.FormatFloat(target.scalar, 'f', -1, 64), target.Units())), nil
+	}
 }
 
 func StringifyUnits(units []string) string {

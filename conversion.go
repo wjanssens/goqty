@@ -216,8 +216,8 @@ func toBaseUnits(numerator, denominator []string) (*Qty, error) {
 			q /= prefix.scalar
 		} else if unit, ok := units[d]; ok {
 			q /= unit.scalar
-			num = append(num, unit.numerator...)
-			den = append(den, unit.denominator...)
+			den = append(den, unit.numerator...)
+			num = append(num, unit.denominator...)
 		}
 	}
 
