@@ -105,7 +105,7 @@ func simplify(units []string) []string {
 	unitCounts := make(map[string]int)
 	for _, unit := range units {
 		if ct, ok := unitCounts[unit]; !ok {
-			unitCounts[unit] = 0
+			unitCounts[unit] = 1
 		} else {
 			unitCounts[unit] = ct + 1
 		}

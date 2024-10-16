@@ -45,7 +45,7 @@ func (q *Qty) Gte(other *Qty) bool {
 //	If including inverses in the sort is needed, I suggest writing: Qty.sort(qtyArray,units)
 func (q *Qty) CompareTo(other *Qty) (int, error) {
 	if !q.IsCompatible(other) {
-		return 0, fmt.Errorf("Incompatible Units %v %v", q.units, other.units)
+		return 0, fmt.Errorf("incompatible units %v %v", q.units, other.units)
 	}
 	if q.baseScalar < other.baseScalar {
 		return -1, nil

@@ -22,8 +22,9 @@ func (q *Qty) Add(input interface{}) (*Qty, error) {
 	}
 
 	if !q.IsCompatible(other) {
-		return nil, fmt.Errorf("incompatible Units %v, %v", q.Units(), other.Units())
+		return nil, fmt.Errorf("incompatible units %v, %v", q.Units(), other.Units())
 	}
+
 	if q.IsTemperature() && other.IsTemperature() {
 		return nil, fmt.Errorf("cannot add two temperatures")
 	} else if q.IsTemperature() {
@@ -56,7 +57,7 @@ func (q *Qty) Sub(input interface{}) (*Qty, error) {
 	}
 
 	if !q.IsCompatible(other) {
-		return nil, fmt.Errorf("incompatible Units %v, %v", q.Units(), other.Units())
+		return nil, fmt.Errorf("incompatible units %v, %v", q.Units(), other.Units())
 	}
 
 	if q.IsTemperature() && other.IsTemperature() {
@@ -67,7 +68,7 @@ func (q *Qty) Sub(input interface{}) (*Qty, error) {
 		return nil, fmt.Errorf("cannot subtract a temperature from a differential degree unit")
 	}
 
-	if to, err := other.To(q.units); err != nil {
+	if to, err := other.To(q.Units()); err != nil {
 		return nil, err
 	} else {
 		return newQty(q.scalar-to.scalar, q.numerator, q.denominator)
@@ -108,7 +109,7 @@ func (q *Qty) Mul(input interface{}) (*Qty, error) {
 	// so as not to confuse results, multiplication and division between temperature degrees will maintain original unit info in num/den
 	// multiplication and division between deg[CFRK] can never factor each other out, only themselves: "degK*degC/degC^2" == "degK/degC"
 	if op1.IsCompatible(op2) && op1.signature != 400 {
-		if op2, err = op2.To(op1.units); err != nil {
+		if op2, err = op2.To(op1.Units()); err != nil {
 			return nil, err
 		}
 	}
@@ -220,26 +221,37 @@ func cleanTerms(num1, den1, num2, den2 []string) (num []string, den []string, sc
 	combineTerms := func(terms []string, direction int) {
 		var k string
 		var prefix string
-
-		for i, term := range terms {
-			if _, ok := prefixes[term]; ok {
-				k = terms[i+1]
+		var prefixValue float64
+		for i := 0; i < len(terms); i++ {
+			term := terms[i]
+			if p, ok := prefixes[term]; ok {
+				// a unit with a prefix (i.e. <centi><meter>)
 				prefix = term
+				prefixValue = p.scalar
+				k = terms[i+1]
+				i++
 			} else {
+				// a unit with no prefix (eg <meter>)
+				prefix = ""
+				prefixValue = 1.0
 				k = term
-				prefix = unity
 			}
 			if k != "" && k != unity {
 				if c, ok := combined[k]; ok {
 					c.dir += direction
-					combinedPrefixValue := prefixes[c.prefix].scalar
-					if v, err := divSafe(prefixes[prefix].scalar, combinedPrefixValue); err != nil {
-						// TODO
+					combinedPrefixValue := 1.0
+					if prefix, ok := prefixes[c.prefix]; ok {
+						combinedPrefixValue = prefix.scalar
+					}
+					if v, err := divSafe(prefixValue, combinedPrefixValue); err != nil {
+						// TODO return error?
+						fmt.Printf("here %v\n", err)
 					} else if c.dir == 1 {
 						c.v1 *= v
 					} else {
 						c.v2 *= v
 					}
+					combined[k] = c
 				} else {
 					combined[k] = combinedType{dir: direction, term: k, prefix: prefix, v1: 1.0, v2: 1.0}
 				}
@@ -259,7 +271,7 @@ func cleanTerms(num1, den1, num2, den2 []string) (num []string, den []string, sc
 	for _, v := range combined {
 		if v.dir > 0 {
 			for n := 0; n < v.dir; n++ {
-				if v.prefix == unity {
+				if v.prefix == "" {
 					num = append(num, v.term)
 				} else {
 					num = append(num, v.prefix, v.term)
@@ -267,7 +279,7 @@ func cleanTerms(num1, den1, num2, den2 []string) (num []string, den []string, sc
 			}
 		} else if v.dir < 0 {
 			for n := 0; n < -v.dir; n++ {
-				if v.prefix == unity {
+				if v.prefix == "" {
 					den = append(den, v.term)
 				} else {
 					den = append(den, v.prefix, v.term)

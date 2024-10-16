@@ -10,10 +10,11 @@ var conversionCache sync.Map
 var baseUnitCache sync.Map
 
 func (q *Qty) To(units string) (*Qty, error) {
-	if cached, found := conversionCache.Load(units); found {
-		result := cached.(*Qty)
-		return result, nil
-	}
+	// TODO conversion cache has to be a member of Qty, not global
+	// if cached, found := conversionCache.Load(units); found {
+	// 	result := cached.(*Qty)
+	// 	return result, nil
+	// }
 
 	// Instantiating target to normalize units
 	target, err := NewQty(1, units)
@@ -30,7 +31,7 @@ func (q *Qty) To(units string) (*Qty, error) {
 				return target, err
 			}
 		} else {
-			return target, fmt.Errorf("incompatible Units")
+			return target, fmt.Errorf("incompatible units %v, %v", q.Units(), target.Units())
 		}
 	} else {
 		if target.IsTemperature() {
@@ -52,7 +53,7 @@ func (q *Qty) To(units string) (*Qty, error) {
 		}
 	}
 
-	conversionCache.Store(units, target)
+	// conversionCache.Store(units, target)
 	return target, nil
 }
 

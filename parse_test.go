@@ -10,8 +10,9 @@ func TestParseUnitOnly(t *testing.T) {
 	if err != nil {
 		t.Errorf("failed to parse 'm'")
 	}
-	if slices.Equal(qty.numerator, []string{"<meter>"}) {
-		t.Errorf("expected numerator %v, got %v", "<meter>", qty.numerator)
+	expected := []string{"<meter>"}
+	if !slices.Equal(qty.numerator, expected) {
+		t.Errorf("expected numerator %v, got %v", expected, qty.numerator)
 	}
 	if qty.scalar != 1 {
 		t.Errorf("expected scalar %v, got %v", 1, qty.scalar)

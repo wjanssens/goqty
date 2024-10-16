@@ -54,13 +54,13 @@ var kinds = map[int]string{
 
 // Returns the list of available well-known kinds of units, e.g.
 // "radiation" or "length".
-func GetKinds() []string {
+func Kinds() []string {
 	var result []string
 	for _, k := range kinds {
 		result = append(result, k)
 	}
 	return result
 }
-func (q *Qty) GetKind() string {
+func (q *Qty) Kind() string {
 	return kinds[q.signature]
 }

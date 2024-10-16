@@ -5,127 +5,150 @@ import (
 )
 
 func TestAdd(t *testing.T) {
-	qty1, err := ParseQty("2.5m")
-	if err != nil {
-		t.Errorf("failed to parse '2.5m', got %v", err)
-		return
+	tests := map[string]struct {
+		a        string
+		b        string
+		expected string
+	}{
+		"2.5m + 3m":  {"2.5m", "3m", "5.5 m"},
+		"2.5m + 3cm": {"2.5m", "3cm", "2.53 m"},
+		"3cm + 2.5m": {"3cm", "2.5m", "253 cm"},
+		"3cm + 5cm":  {"3cm", "5cm", "8 cm"},
+		"3m + 2s":    {"3m", "2s", "incompatible units m, s"},
+		"10S + 0.1Ω": {"10S", "0.1Ω", "incompatible units S, Ω"},
 	}
-	qty2, err := ParseQty("3m")
-	if err != nil {
-		t.Errorf("failed to parse '2.5m', got %v", err)
-		return
-	}
-
-	if a, err := qty1.Add(qty2); err != nil {
-		t.Errorf("failed to add, got %v", err)
-	} else {
-		if a.scalar != 5.5 {
-			t.Errorf("expected scalar %v, got %v", 5.5, a.scalar)
-		}
-	}
-
-	if a, err := qty1.Add("3m"); err != nil {
-		t.Errorf("failed to add, got %v", err)
-	} else {
-		if a.scalar != 5.5 {
-			t.Errorf("expected scalar %v, got %v", 5.5, a.scalar)
-		}
-	}
-
-	qty2, err = ParseQty("3cm")
-	if err != nil {
-		t.Errorf("failed to parse '3cm', got %v", err)
-		return
-	}
-	if a, err := qty1.Add(qty2); err != nil {
-		t.Errorf("failed to add, got %v", err)
-	} else {
-		if a.scalar != 2.53 {
-			t.Errorf("expected scalar %v, got %v", 2.53, a.scalar)
-		}
-	}
-	if a, err := qty2.Add(qty1); err != nil {
-		t.Errorf("failed to add, got %v", err)
-	} else {
-		if a.scalar != 253 {
-			t.Errorf("expected scalar %v, got %v", 253, a.scalar)
-		}
-		u := a.Units()
-		if u != "cm" {
-			t.Errorf("expected units %v, got %v", "cm", u)
-		}
-	}
-
-	qty1, err = ParseQty("5cm")
-	if err != nil {
-		t.Errorf("failed to parse '5cm', got %v", err)
-		return
-	}
-	if a, err := qty2.Add(qty1); err != nil {
-		t.Errorf("failed to add, got %v", err)
-	} else {
-		if a.scalar != 253 {
-			t.Errorf("expected scalar %v, got %v", 253, a.scalar)
-		}
-		u := a.Units()
-		if u != "cm" {
-			t.Errorf("expected units %v, got %v", "cm", u)
-		}
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			a, err := ParseQty(test.a)
+			if err != nil {
+				t.Errorf("failed to parse %v, got %v", test.a, err)
+				return
+			}
+			b, err := ParseQty(test.b)
+			if err != nil {
+				t.Errorf("failed to parse %v, got %v", test.b, err)
+				return
+			}
+			if actual, err := a.Add(b); err != nil {
+				if err.Error() != test.expected {
+					t.Errorf("expected %v, got %v", test.expected, err)
+				}
+			} else {
+				str := actual.String()
+				if str != test.expected {
+					t.Errorf("expected %v, got %v", test.expected, actual)
+				}
+			}
+			if actual, err := a.Add(test.b); err != nil {
+				if err.Error() != test.expected {
+					t.Errorf("expected %v, got %v", test.expected, err)
+				}
+			} else {
+				str := actual.String()
+				if str != test.expected {
+					t.Errorf("expected %v, got %v", test.expected, actual)
+				}
+			}
+		})
 	}
 }
 
-func TestAddUnlike(t *testing.T) {
-	qty1, err := ParseQty("3m")
-	if err != nil {
-		t.Errorf("failed to parse '3m', got %v", err)
-		return
+func TestSub(t *testing.T) {
+	tests := map[string]struct {
+		a        string
+		b        string
+		expected string
+	}{
+		"2.5m - 3m":  {"2.5m", "3m", "-0.5 m"},
+		"3m - 2.5m":  {"3m", "2.5m", "0.5 m"},
+		"2.5m - 3cm": {"2.5m", "3cm", "2.47 m"},
+		"3cm - 2.5m": {"3cm", "2.5m", "-247 cm"},
+		"3cm - 5cm":  {"3cm", "5cm", "-2 cm"},
+		"3m - 2s":    {"3m", "2s", "incompatible units m, s"},
+		"10S - 0.1Ω": {"10S", "0.1Ω", "incompatible units S, Ω"},
 	}
-	qty2, err := ParseQty("2s")
-	if err != nil {
-		t.Errorf("failed to parse '2s', got %v", err)
-		return
-	}
-	q, err := qty1.Add(qty2)
-	if err == nil {
-		t.Errorf("expected error, got %v", q)
-	}
-	q, err = qty2.Add(qty1)
-	if err == nil {
-		t.Errorf("expected error, got %v", q)
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			a, err := ParseQty(test.a)
+			if err != nil {
+				t.Errorf("failed to parse %v, got %v", test.a, err)
+				return
+			}
+			b, err := ParseQty(test.b)
+			if err != nil {
+				t.Errorf("failed to parse %v got %v", test.b, err)
+				return
+			}
+			if actual, err := a.Sub(b); err != nil {
+				if err.Error() != test.expected {
+					t.Errorf("expected %v, got %v", test.expected, err)
+				}
+			} else {
+				str := actual.String()
+				if str != test.expected {
+					t.Errorf("expected %v, got %v", test.expected, actual)
+				}
+			}
+			if actual, err := a.Sub(test.b); err != nil {
+				if err.Error() != test.expected {
+					t.Errorf("expected %v, got %v", test.expected, err)
+				}
+			} else {
+				str := actual.String()
+				if str != test.expected {
+					t.Errorf("expected %v, got %v", test.expected, actual)
+				}
+			}
+		})
 	}
 }
 
-func TestAddInverse(t *testing.T) {
-	qty1, err := ParseQty("10S")
-	if err != nil {
-		t.Errorf("failed to parse '3m', got %v", err)
-		return
+func TestMul(t *testing.T) {
+	tests := map[string]struct {
+		a        string
+		b        string
+		expected string
+	}{
+		"2.5m * 3m":  {"2.5m", "3m", "7.5 m2"},
+		"3m * 2.5m":  {"3m", "2.5m", "7.5 m2"},
+		"2.5m * 3cm": {"2.5m", "3cm", "0.075 m2"},
+		"3cm * 2.5m": {"3cm", "2.5m", "750 cm2"},
+		"2.5m * 3.5": {"2.5m", "3.5", "8.75 m"},
+		"2.5m * 0.0": {"2.5m", "0.0", "0 m"},
+		"10S * 0m":   {"2.5m", "0m", "0 m2"},
 	}
-	qty2, err := qty1.Inverse()
-	if err != nil {
-		t.Errorf("failed to invert', got %v", err)
-		return
-	}
-	q, err := qty1.Add(qty2)
-	if err == nil {
-		t.Errorf("expected error, got %v", q)
-	}
-	q, err = qty2.Add(qty1)
-	if err == nil {
-		t.Errorf("expected error, got %v", q)
-	}
-
-	qty2, err = ParseQty("0.1ohm")
-	if err != nil {
-		t.Errorf("failed to parse '0.1ohm', got %v", err)
-		return
-	}
-	q, err = qty1.Add(qty2)
-	if err == nil {
-		t.Errorf("expected error, got %v", q)
-	}
-	q, err = qty2.Add(qty1)
-	if err == nil {
-		t.Errorf("expected error, got %v", q)
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			a, err := ParseQty(test.a)
+			if err != nil {
+				t.Errorf("failed to parse %v, got %v", test.a, err)
+				return
+			}
+			b, err := ParseQty(test.b)
+			if err != nil {
+				t.Errorf("failed to parse %v got %v", test.b, err)
+				return
+			}
+			if actual, err := a.Mul(b); err != nil {
+				if err.Error() != test.expected {
+					t.Errorf("expected %v, got %v", test.expected, err)
+				}
+			} else {
+				str := actual.String()
+				if str != test.expected {
+					t.Errorf("expected %v, got %v", test.expected, actual)
+				}
+			}
+			if actual, err := a.Mul(test.b); err != nil {
+				if err.Error() != test.expected {
+					t.Errorf("expected %v, got %v", test.expected, err)
+				}
+			} else {
+				str := actual.String()
+				if str != test.expected {
+					t.Errorf("expected %v, got %v", test.expected, actual)
+				}
+			}
+		})
 	}
 }
