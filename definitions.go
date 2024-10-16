@@ -228,6 +228,41 @@ var units = map[string]Unit{
 
 	// frequency
 	"<hertz>": makeUnit("frequency", []string{"Hz", "hertz", "Hertz"}, 1.0, []string{"<1>"}, []string{"<second>"}),
+
+	// angle
+	"<radian>":    makeUnit("angle", []string{"rad", "radian", "radians"}, 1.0, []string{"<radian>"}, nil),
+	"<degree>":    makeUnit("angle", []string{"deg", "degree", "degrees"}, math.Pi/180.0, []string{"<radian>"}, nil),
+	"<arcminute>": makeUnit("angle", []string{"arcmin", "arcminute", "arcminutes"}, math.Pi/10800.0, []string{"<radian>"}, nil),
+	"<arcsecond>": makeUnit("angle", []string{"arcsec", "arcsecond", "arcseconds"}, math.Pi/648000.0, []string{"<radian>"}, nil),
+	"<gradian>":   makeUnit("angle", []string{"gon", "grad", "gradian", "grads"}, math.Pi/200.0, []string{"<radian>"}, nil),
+	"<steradian>": makeUnit("solid_angle", []string{"sr", "steradian", "steradians"}, 1.0, []string{"<steradian>"}, nil),
+
+	// rotation
+	"<rotation>": makeUnit("angle", []string{"rotation"}, 2.0*math.Pi, []string{"<radian>"}, nil),
+	"<rpm>":      makeUnit("angular_velocity", []string{"rpm"}, 2.0*math.Pi/60.0, []string{"<radian>"}, []string{"<second>"}),
+
+	// information
+	"<byte>": makeUnit("information", []string{"B", "byte", "bytes"}, 1.0, []string{"<byte>"}, nil),
+	"<bit>":  makeUnit("information", []string{"b", "bit", "bits"}, 0.125, []string{"<byte>"}, nil),
+
+	// information rate
+	"<Bps>": makeUnit("information_rate", []string{"Bps"}, 1.0, []string{"<byte>"}, []string{"<second>"}),
+	"<bps>": makeUnit("information_rate", []string{"bps"}, 0.125, []string{"<byte>"}, []string{"<second>"}),
+
+	// currency
+	// "<dollar>": makeUnit("currency", []string{"USD", "dollar"}, 1.0, []string{"<dollar>"}, nil),
+	// "<cents>":  makeUnit("currency", []string{"cents"}, 0.01, []string{"<dollar>"}, nil),
+
+	// luminosity
+	"<candela>": makeUnit("luminosity", []string{"cd", "candela"}, 1.0, []string{"<candela>"}, nil),
+	"<lumen>":   makeUnit("luminous_power", []string{"lm", "lumen"}, 1.0, []string{"<candela>", "<steradian>"}, nil),
+	"<lux>":     makeUnit("illuminance", []string{"lux"}, 1.0, []string{"<candela>", "<steradian>"}, []string{"<meter>", "<meter>"}),
+
+	// power
+	"<watt>":                 makeUnit("power", []string{"W", "watt", "watts"}, 1.0, []string{"<kilogram>", "<meter>", "<meter>"}, []string{"<second>", "<second>", "<second>"}),
+	"<volt-ampere>":          makeUnit("power", []string{"VA", "volt-ampere"}, 1.0, []string{"<kilogram>", "<meter>", "<meter>"}, []string{"<second>", "<second>", "<second>"}),
+	"<volt-ampere-reactive>": makeUnit("power", []string{"var", "Var", "VAr", "VAR", "volt-ampere-reactive"}, 1.0, []string{"<kilogram>", "<meter>", "<meter>"}, []string{"<second>", "<second>", "<second>"}),
+	"<horsepower>":           makeUnit("power", []string{"hp", "horsepower"}, 745.699872, []string{"<kilogram>", "<meter>", "<meter>"}, []string{"<second>", "<second>", "<second>"}),
 }
 var unitsByAlias = makeUnitAliasMap(units)
 
@@ -236,41 +271,6 @@ var outputs = makeOutputsMap(units)
 var baseUnits = []string{"<meter>", "<kilogram>", "<second>", "<mole>", "<ampere>", "<radian>", "<kelvin>", "<temp-K>", "<byte>", "<dollar>", "<candela>", "<each>", "<steradian>", "<decibel>"}
 
 // export var UNITS = {
-
-//   /* angle */
-//   "<radian>" :[["rad","radian","radians"], 1.0, "angle", ["<radian>"]],
-//   "<degree>" :[["deg","degree","degrees"], Math.PI / 180.0, "angle", ["<radian>"]],
-//   "<arcminute>" :[["arcmin","arcminute","arcminutes"], Math.PI / 10800.0, "angle", ["<radian>"]],
-//   "<arcsecond>" :[["arcsec","arcsecond","arcseconds"], Math.PI / 648000.0, "angle", ["<radian>"]],
-//   "<gradian>"   :[["gon","grad","gradian","grads"], Math.PI / 200.0, "angle", ["<radian>"]],
-//   "<steradian>"  : [["sr","steradian","steradians"], 1.0, "solid_angle", ["<steradian>"]],
-
-//   /* rotation */
-//   "<rotation>" : [["rotation"], 2.0 * Math.PI, "angle", ["<radian>"]],
-//   "<rpm>"   :[["rpm"], 2.0 * Math.PI / 60.0, "angular_velocity", ["<radian>"], ["<second>"]],
-
-//   /* information */
-//   "<byte>"  :[["B","byte","bytes"], 1.0, "information", ["<byte>"]],
-//   "<bit>"  :[["b","bit","bits"], 0.125, "information", ["<byte>"]],
-
-//   /* information rate */
-//   "<Bps>" : [["Bps"], 1.0, "information_rate", ["<byte>"], ["<second>"]],
-//   "<bps>" : [["bps"], 0.125, "information_rate", ["<byte>"], ["<second>"]],
-
-//   /* currency */
-//   "<dollar>":[["USD","dollar"], 1.0, "currency", ["<dollar>"]],
-//   "<cents>" :[["cents"], 0.01, "currency", ["<dollar>"]],
-
-//   /* luminosity */
-//   "<candela>" : [["cd","candela"], 1.0, "luminosity", ["<candela>"]],
-//   "<lumen>" : [["lm","lumen"], 1.0, "luminous_power", ["<candela>","<steradian>"]],
-//   "<lux>" :[["lux"], 1.0, "illuminance", ["<candela>","<steradian>"], ["<meter>","<meter>"]],
-
-//   /* power */
-//   "<watt>"  : [["W","watt","watts"], 1.0, "power", ["<kilogram>","<meter>","<meter>"], ["<second>","<second>","<second>"]],
-//   "<volt-ampere>"  : [["VA","volt-ampere"], 1.0, "power", ["<kilogram>","<meter>","<meter>"], ["<second>","<second>","<second>"]],
-//   "<volt-ampere-reactive>"  : [["var","Var","VAr","VAR","volt-ampere-reactive"], 1.0, "power", ["<kilogram>","<meter>","<meter>"], ["<second>","<second>","<second>"]],
-//   "<horsepower>"  :  [["hp","horsepower"], 745.699872, "power", ["<kilogram>","<meter>","<meter>"], ["<second>","<second>","<second>"]],
 
 //   /* radiation */
 //   "<gray>" : [["Gy","gray","grays"], 1.0, "radiation", ["<meter>","<meter>"], ["<second>","<second>"]],
@@ -307,13 +307,6 @@ var baseUnits = []string{"<meter>", "<kilogram>", "<second>", "<mole>", "<ampere
 //   "<decibel>"  : [["dB","decibel","decibels"], 1.0, "logarithmic", ["<decibel>"]]
 // };
 
-// export var BASE_UNITS = ["<meter>","<kilogram>","<second>","<mole>", "<ampere>","<radian>","<kelvin>","<temp-K>","<byte>","<dollar>","<candela>","<each>","<steradian>","<decibel>"];
-
-// export var UNITY = "<1>";
-// export var UNITY_ARRAY = [UNITY];
-
-// // Setup
-
 // /**
 //  * Asserts unit definition is valid
 //  *
@@ -345,35 +338,6 @@ var baseUnits = []string{"<meter>", "<kilogram>", "<second>", "<mole>", "<ampere
 //                          "Unit " + unit + " in 'denominator' is not recognized");
 //     }
 //   });
-// }
-
-// export var PREFIX_VALUES = {};
-// export var PREFIX_MAP = {};
-// export var UNIT_VALUES = {};
-// export var UNIT_MAP = {};
-// export var OUTPUT_MAP = {};
-// for (var unitDef in UNITS) {
-//   if (UNITS.hasOwnProperty(unitDef)) {
-//     var definition = UNITS[unitDef];
-//     if (definition[2] === "prefix") {
-//       PREFIX_VALUES[unitDef] = definition[1];
-//       for (var i = 0; i < definition[0].length; i++) {
-//         PREFIX_MAP[definition[0][i]] = unitDef;
-//       }
-//     }
-//     else {
-//       validateUnitDefinition(unitDef, definition);
-//       UNIT_VALUES[unitDef] = {
-//         scalar: definition[1],
-//         numerator: definition[3],
-//         denominator: definition[4]
-//       };
-//       for (var j = 0; j < definition[0].length; j++) {
-//         UNIT_MAP[definition[0][j]] = unitDef;
-//       }
-//     }
-//     OUTPUT_MAP[unitDef] = definition[0][0];
-//   }
 // }
 
 // /**

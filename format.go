@@ -113,7 +113,7 @@ func simplify(units []string) []string {
 	result := []string{}
 	for k, v := range unitCounts {
 		if v > 1 {
-			result = append(result, fmt.Sprintf("%v%v", k, v))
+			result = append(result, fmt.Sprintf("%v^%v", k, v))
 		} else {
 			result = append(result, k)
 		}
