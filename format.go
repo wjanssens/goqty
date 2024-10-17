@@ -102,20 +102,25 @@ func getOutputNames(units []string) []string {
 func simplify(units []string) []string {
 	// this turns ['s','m','s'] into ['s2','m']
 
-	unitCounts := make(map[string]int)
+	// using 2 slices as a map doesn't have a defined iteration order
+	var k []string
+	var v []int
+
 	for _, unit := range units {
-		if ct, ok := unitCounts[unit]; !ok {
-			unitCounts[unit] = 1
+		if i := slices.Index(k, unit); i >= 0 {
+			v[i]++
 		} else {
-			unitCounts[unit] = ct + 1
+			k = append(k, unit)
+			v = append(v, 1)
 		}
 	}
+
 	result := []string{}
-	for k, v := range unitCounts {
-		if v > 1 {
-			result = append(result, fmt.Sprintf("%v^%v", k, v))
+	for i := 0; i < len(k); i++ {
+		if v[i] > 1 {
+			result = append(result, fmt.Sprintf("%v^%v", k[i], v[i]))
 		} else {
-			result = append(result, k)
+			result = append(result, k[i])
 		}
 	}
 	return result

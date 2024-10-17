@@ -202,8 +202,9 @@ type combinedType struct {
 	dir    int
 	term   string
 	prefix string
-	v1     float64
-	v2     float64
+	// scale factors
+	num float64
+	den float64
 }
 
 func cleanTerms(num1, den1, num2, den2 []string) (num []string, den []string, scale float64, err error) {
@@ -244,16 +245,19 @@ func cleanTerms(num1, den1, num2, den2 []string) (num []string, den []string, sc
 						combinedPrefixValue = prefix.scalar
 					}
 					if v, err := divSafe(prefixValue, combinedPrefixValue); err != nil {
+						// prefix scalars are never zero, so division by zero can't happen
 						// TODO return error?
 						fmt.Printf("here %v\n", err)
-					} else if c.dir == 1 {
-						c.v1 *= v
 					} else {
-						c.v2 *= v
+						if direction == 1 {
+							c.num *= v
+						} else {
+							c.den *= v
+						}
+						combined[k] = c
 					}
-					combined[k] = c
 				} else {
-					combined[k] = combinedType{dir: direction, term: k, prefix: prefix, v1: 1.0, v2: 1.0}
+					combined[k] = combinedType{dir: direction, term: k, prefix: prefix, num: 1.0, den: 1.0}
 				}
 			}
 		}
@@ -286,7 +290,7 @@ func cleanTerms(num1, den1, num2, den2 []string) (num []string, den []string, sc
 				}
 			}
 		}
-		if s, err := divSafe(v.v1, v.v2); err != nil {
+		if s, err := divSafe(v.num, v.den); err != nil {
 			return nil, nil, 0, err
 		} else {
 			scale *= s

@@ -31,12 +31,12 @@ const qtyString = "(" + signedNumber + ")?\\s*([^/]*)(?:/(.+))?"
 var qtyStringRegex = regexp.MustCompile("^" + qtyString + "$")
 
 const powerOp = "\\^|\\*{2}"
-const safePower = "[01234]"
+const safePower = "[0-9]+"
 
 var topRegex = regexp.MustCompile("([^ \\*\\d]+?)(?:" + powerOp + ")?(-?" + safePower + ")")
-var notTopRegex = regexp.MustCompile("([^ \\*\\d]+?)(?:" + powerOp + ")?(-?" + safePower + "([a-zA-Z]))")
+var notTopRegex = regexp.MustCompile("([^ \\*\\d]+?)(?:" + powerOp + ")?(-?" + safePower + "[a-zA-Z])")
 var bottomRegex = regexp.MustCompile("([^ \\*\\d]+?)(?:" + powerOp + ")?(" + safePower + ")")
-var notBottomRegex = regexp.MustCompile("([^ \\*\\d]+?)(?:" + powerOp + ")?(" + safePower + "([a-zA-Z]))")
+var notBottomRegex = regexp.MustCompile("([^ \\*\\d]+?)(?:" + powerOp + ")?(" + safePower + "[a-zA-Z])")
 
 var prefix = re(prefixesByAlias)
 var unit = re(unitsByAlias)
@@ -70,7 +70,7 @@ func ParseQty(expr string) (*Qty, error) {
 	expr = strings.TrimSpace(expr)
 	qtyMatches := qtyStringRegex.FindStringSubmatch(expr)
 	if qtyMatches == nil {
-		return nil, fmt.Errorf("%v: Quantity not recognized", expr)
+		return nil, fmt.Errorf("quantity not recognized: %v", expr)
 	}
 	scalar := qtyMatches[1]
 	top := qtyMatches[2]
@@ -92,17 +92,22 @@ func ParseQty(expr string) (*Qty, error) {
 		if matches == nil {
 			break
 		}
+		// alternative to negative lookahead, allows for units like cmH2O
 		if m := notTopRegex.FindStringSubmatch(top); m != nil {
 			break
 		}
 		unit := matches[1]
 		power := matches[2]
 
+		// Prevents infinite loops
 		if n, err = strconv.ParseInt(power, 10, 8); err != nil {
-			return nil, fmt.Errorf("unit exponenent is not a number")
+			return nil, fmt.Errorf("unit exponent is not a number")
+		} else if n > 4 {
+			return nil, fmt.Errorf("unit not recognized")
 		}
+		//Disallow unrecognized unit even if exponent is 0
 		if unitTestRegex.FindString(unit) == "" {
-			return nil, fmt.Errorf("unit is not recognized")
+			return nil, fmt.Errorf("unit not recognized")
 		}
 		x = unit + " "
 		nx = ""
@@ -126,6 +131,7 @@ func ParseQty(expr string) (*Qty, error) {
 		if matches == nil {
 			break
 		}
+		// alternative to negative lookahead, allows for units like cmH2O
 		if m := notBottomRegex.FindStringSubmatch(bottom); m != nil {
 			break
 		}
@@ -157,12 +163,12 @@ func ParseQty(expr string) (*Qty, error) {
 
 	if top != "" {
 		if result.numerator, err = parseUnits(strings.TrimSpace(top)); err != nil {
-			return nil, fmt.Errorf("unparsable numerator units")
+			return nil, err
 		}
 	}
 	if bottom != "" {
 		if result.denominator, err = parseUnits(strings.TrimSpace(bottom)); err != nil {
-			return nil, fmt.Errorf("unparsable denominator units")
+			return nil, err
 		}
 	}
 

@@ -47,7 +47,7 @@ var prefixes = map[string]Unit{
 	"<deci>":   makeUnit("prefix", []string{"d", "Deci", "deci"}, 1e-01, nil, nil),
 	"<centi>":  makeUnit("prefix", []string{"c", "Centi", "centi"}, 1e-02, nil, nil),
 	"<milli>":  makeUnit("prefix", []string{"m", "Milli", "milli"}, 1e-03, nil, nil),
-	"<micro>":  makeUnit("prefix", []string{"\u03BC", "\u00B5", "u", "Micro", "micro"}, 1e-06, nil, nil),
+	"<micro>":  makeUnit("prefix", []string{"\u00B5", "\u03BC", "u", "Micro", "micro"}, 1e-06, nil, nil),
 	"<nano>":   makeUnit("prefix", []string{"n", "Nano", "nano"}, 1e-09, nil, nil),
 	"<pico>":   makeUnit("prefix", []string{"p", "Pico", "pico"}, 1e-12, nil, nil),
 	"<femto>":  makeUnit("prefix", []string{"f", "Femto", "femto"}, 1e-15, nil, nil),
