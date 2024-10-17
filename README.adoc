@@ -9,78 +9,65 @@ This library has no dependencies.
 
 ## Installation
 
-TODO
+go get github.com/wjanssens/goqty
 
 ## Usage
 
-TODO
+[source,go]
+----
+import (
+    "fmt"
+    "github.com/wjanssens/goqty"
+)
+if q, err := goqty.ParseQty("50km/h"); err == nil {
+    fmt.Printf("%v\n", q) // => 50 km/h
+}
+----
 
 ## Synopsis
 
-### Creation
+.Creation
+[source,go]
+----
+qty, err = ParseQty("1m");
+qty, err = ParseQty('m'); // scalar defaults to 1
 
-TODO
+// compound numerators
+qty, err = ParseQty("1 N*m");
+qty, err = ParseQty("1 N m"); // * is optional
 
-// Instances of quantities are made by means of `Qty()` method. `Qty` can both be
-// used as a constructor (with new) or as a factory (without new):
+// denominators
+qty, err = ParseQty("1 m/s");
 
-// ```javascript
-// qty = new Qty('23 ft'); // constructor
-// qty = Qty('23 ft'); // factory
-// ```
+// powers
+qty, err = ParseQty("1 m^2/s**2"); // ^ or **
+qty, err = ParseQty("1 m^2 s^-2"); // negative powers
+qty, err = ParseQty("1 m2 s-2"); // ^ is optional
 
-// `Qty` constructor accepts strings, numbers and `Qty` instances as
-// initializing values.
+qty, err = ParseQty("1 m^2 kg^2 J^2/s^2 A");
 
-// If scalars and their respective units are available programmatically, the
-// two argument signature may be useful:
+// unitless quantities
+qty, err = ParseQty("1.5");
+qty, err = NewQty(1.5, "");
 
-// ```javascript
-// qty = new Qty(124, 'cm'); // => 1.24 meter
-// qty = Qty(124, 'cm'); // => 1.24 meter
-// ```
+// unicode prefixes and units
+qty, err = ParseQty("1.5 µm");
+qty, err = ParseQty("1.5 Ω");
 
-// For the sake of simplicity, one will use the factory way below but using
-// `new Qty()` is equivalent.
+qty = Qty("1 attoparsec/microfortnight");
+----
 
-// ```javascript
-// qty = Qty('1m'); // => 1 meter
-// qty = Qty('m'); // =>  1 meter (scalar defaults to 1)
+.Kinds
+[source,go]
+----
+// get a list of well-known kinds of units
+kinds := goqty.Kinds()
 
-// qty = Qty('1 N*m');
-// qty = Qty('1 N m'); // * is optional
-
-// qty = Qty('1 m/s');
-
-// qty = Qty('1 m^2/s^2');
-// qty = Qty('1 m^2 s^-2'); // negative powers
-// qty = Qty('1 m2 s-2'); // ^ is optional
-
-// qty = Qty('1 m^2 kg^2 J^2/s^2 A');
-
-// qty = Qty('1.5'); // unitless quantity
-// qty = Qty(1.5); // number as initializing value
-
-// qty = Qty('1 attoparsec/microfortnight');
-
-// qtyCopy = Qty(qty); // quantity could be copied when used as
-//                     // initializing value
-// ```
-
-// `Qty.parse` utility method is also provided to parse and create
-// quantities from strings. Unlike the constructor, it will return `null`
-// instead of throwing an error when parsing an invalid quantity.
-
-// ```javascript
-// Qty.parse('1 m'); // => 1 meter
-// Qty.parse('foo') // => null
-// ```
-
-// ### Available well-known kinds
-
-// ```javascript
-// Qty.getKinds(); // => Array of names of every well-known kind of units
-// ```
+// get the kind of a unit
+if qty, err := goqty.ParseQty("5m"); err == nil {
+    fmt.Printf("kind %v\n", qty.Kind())
+}
+----
 
 // ### Available units of a particular kind
 
