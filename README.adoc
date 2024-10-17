@@ -1,4 +1,4 @@
-# JS-quantities
+# goqty
 
 Goqty is a Go port of gentooboontoo's js-quantities Javascript library (https://github.com/gentooboontoo/js-quantities) which is a port of Kevin Olbrich's Ruby library
 Units (https://github.com/olbrich/ruby-units).
@@ -63,11 +63,24 @@ qty = Qty("1 attoparsec/microfortnight");
 // get a list of well-known kinds of units
 kinds := goqty.Kinds()
 
-// get the kind of a unit
+// get the kind of a quantity
 if qty, err := goqty.ParseQty("5m"); err == nil {
     fmt.Printf("kind %v\n", qty.Kind())
 }
 ----
+
+.Units
+[source,go]
+----
+// get a list of well-known kinds of units
+kinds := goqty.Units("length")
+
+// get the unit of a quantity
+if qty, err := goqty.ParseQty("5m"); err == nil {
+    fmt.Printf("unit %v\n", qty.Unit())
+}
+----
+
 
 // ### Available units of a particular kind
 

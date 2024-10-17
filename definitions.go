@@ -1,6 +1,9 @@
 package goqty
 
-import "math"
+import (
+	"math"
+	"slices"
+)
 
 type Unit struct {
 	kind        string
@@ -58,8 +61,7 @@ var prefixes = map[string]Unit{
 var prefixesByAlias = makeUnitAliasMap(prefixes)
 
 var units = map[string]Unit{
-	"<1>":       unityUnit,
-	"<decibel>": makeUnit("logarithmic", []string{"dB", "decibel", "decibels"}, 1, []string{"<decibel>"}, nil),
+	"<1>": unityUnit,
 
 	// length
 	"<meter>":        makeUnit("length", []string{"m", "meter", "meters", "metre", "metres"}, 1, []string{"<meter>"}, nil),
@@ -263,49 +265,50 @@ var units = map[string]Unit{
 	"<volt-ampere>":          makeUnit("power", []string{"VA", "volt-ampere"}, 1.0, []string{"<kilogram>", "<meter>", "<meter>"}, []string{"<second>", "<second>", "<second>"}),
 	"<volt-ampere-reactive>": makeUnit("power", []string{"var", "Var", "VAr", "VAR", "volt-ampere-reactive"}, 1.0, []string{"<kilogram>", "<meter>", "<meter>"}, []string{"<second>", "<second>", "<second>"}),
 	"<horsepower>":           makeUnit("power", []string{"hp", "horsepower"}, 745.699872, []string{"<kilogram>", "<meter>", "<meter>"}, []string{"<second>", "<second>", "<second>"}),
+
+	// radiation
+	"<gray>":      makeUnit("radiation", []string{"Gy", "gray", "grays"}, 1.0, []string{"<meter>", "<meter>"}, []string{"<second>", "<second>"}),
+	"<roentgen>":  makeUnit("radiation", []string{"R", "roentgen"}, 0.009330, []string{"<meter>", "<meter>"}, []string{"<second>", "<second>"}),
+	"<sievert>":   makeUnit("radiation", []string{"Sv", "sievert", "sieverts"}, 1.0, []string{"<meter>", "<meter>"}, []string{"<second>", "<second>"}),
+	"<becquerel>": makeUnit("radiation", []string{"Bq", "becquerel", "becquerels"}, 1.0, []string{"<1>"}, []string{"<second>"}),
+	"<curie>":     makeUnit("radiation", []string{"Ci", "curie", "curies"}, 3.7e10, []string{"<1>"}, []string{"<second>"}),
+
+	// rate
+	"<cpm>": makeUnit("rate", []string{"cpm"}, 1.0/60.0, []string{"<count>"}, []string{"<second>"}),
+	"<dpm>": makeUnit("rate", []string{"dpm"}, 1.0/60.0, []string{"<count>"}, []string{"<second>"}),
+	"<bpm>": makeUnit("rate", []string{"bpm"}, 1.0/60.0, []string{"<count>"}, []string{"<second>"}),
+
+	// resolution / typography
+	"<dot>":   makeUnit("resolution", []string{"dot", "dots"}, 1, []string{"<each>"}, nil),
+	"<pixel>": makeUnit("resolution", []string{"pixel", "px"}, 1, []string{"<each>"}, nil),
+	"<ppi>":   makeUnit("resolution", []string{"ppi"}, 1, []string{"<pixel>"}, []string{"<inch>"}),
+	"<dpi>":   makeUnit("typography", []string{"dpi"}, 1, []string{"<dot>"}, []string{"<inch>"}),
+
+	// counting
+	"<cell>":       makeUnit("counting", []string{"cells", "cell"}, 1, []string{"<each>"}, nil),
+	"<each>":       makeUnit("counting", []string{"each"}, 1.0, []string{"<each>"}, nil),
+	"<count>":      makeUnit("counting", []string{"count"}, 1.0, []string{"<each>"}, nil),
+	"<base-pair>":  makeUnit("counting", []string{"bp", "base-pair"}, 1.0, []string{"<each>"}, nil),
+	"<nucleotide>": makeUnit("counting", []string{"nt", "nucleotide"}, 1.0, []string{"<each>"}, nil),
+	"<molecule>":   makeUnit("counting", []string{"molecule", "molecules"}, 1.0, []string{"<1>"}, nil),
+
+	// prefix only
+	"<dozen>":   makeUnit("prefix_only", []string{"doz", "dz", "dozen"}, 12.0, []string{"<each>"}, nil),
+	"<percent>": makeUnit("prefix_only", []string{"%", "percent"}, 0.01, []string{"<1>"}, nil),
+	"<ppm>":     makeUnit("prefix_only", []string{"ppm"}, 1e-6, []string{"<1>"}, nil),
+	"<ppb>":     makeUnit("prefix_only", []string{"ppb"}, 1e-9, []string{"<1>"}, nil),
+	"<ppt>":     makeUnit("prefix_only", []string{"ppt"}, 1e-12, []string{"<1>"}, nil),
+	"<ppq>":     makeUnit("prefix_only", []string{"ppq"}, 1e-15, []string{"<1>"}, nil),
+	"<gross>":   makeUnit("prefix_only", []string{"gr", "gross"}, 144.0, []string{"<dozen>", "<dozen>"}, nil),
+
+	// logarithmic
+	"<decibel>": makeUnit("logarithmic", []string{"dB", "decibel", "decibels"}, 1.0, []string{"<decibel>"}, nil),
 }
 var unitsByAlias = makeUnitAliasMap(units)
 
 // var valuesByUnitAlias = makeUnitValuesMap(units)
 var outputs = makeOutputsMap(units)
 var baseUnits = []string{"<meter>", "<kilogram>", "<second>", "<mole>", "<ampere>", "<radian>", "<kelvin>", "<temp-K>", "<byte>", "<dollar>", "<candela>", "<each>", "<steradian>", "<decibel>"}
-
-// export var UNITS = {
-
-//   /* radiation */
-//   "<gray>" : [["Gy","gray","grays"], 1.0, "radiation", ["<meter>","<meter>"], ["<second>","<second>"]],
-//   "<roentgen>" : [["R","roentgen"], 0.009330, "radiation", ["<meter>","<meter>"], ["<second>","<second>"]],
-//   "<sievert>" : [["Sv","sievert","sieverts"], 1.0, "radiation", ["<meter>","<meter>"], ["<second>","<second>"]],
-//   "<becquerel>" : [["Bq","becquerel","becquerels"], 1.0, "radiation", ["<1>"],["<second>"]],
-//   "<curie>" : [["Ci","curie","curies"], 3.7e10, "radiation", ["<1>"],["<second>"]],
-
-//   /* rate */
-//   "<cpm>" : [["cpm"], 1.0 / 60.0, "rate", ["<count>"],["<second>"]],
-//   "<dpm>" : [["dpm"], 1.0 / 60.0, "rate", ["<count>"],["<second>"]],
-//   "<bpm>" : [["bpm"], 1.0 / 60.0, "rate", ["<count>"],["<second>"]],
-
-//   /* resolution / typography */
-//   "<dot>" : [["dot","dots"], 1, "resolution", ["<each>"]],
-//   "<pixel>" : [["pixel","px"], 1, "resolution", ["<each>"]],
-//   "<ppi>" : [["ppi"], 1, "resolution", ["<pixel>"], ["<inch>"]],
-//   "<dpi>" : [["dpi"], 1, "typography", ["<dot>"], ["<inch>"]],
-
-//   /* other */
-//   "<cell>" : [["cells","cell"], 1, "counting", ["<each>"]],
-//   "<each>" : [["each"], 1.0, "counting", ["<each>"]],
-//   "<count>" : [["count"], 1.0, "counting", ["<each>"]],
-//   "<base-pair>"  : [["bp","base-pair"], 1.0, "counting", ["<each>"]],
-//   "<nucleotide>" : [["nt","nucleotide"], 1.0, "counting", ["<each>"]],
-//   "<molecule>" : [["molecule","molecules"], 1.0, "counting", ["<1>"]],
-//   "<dozen>" :  [["doz","dz","dozen"],12.0,"prefix_only", ["<each>"]],
-//   "<percent>": [["%","percent"], 0.01, "prefix_only", ["<1>"]],
-//   "<ppm>" :  [["ppm"],1e-6, "prefix_only", ["<1>"]],
-//   "<ppb>" :  [["ppb"],1e-9, "prefix_only", ["<1>"]],
-//   "<ppt>" :  [["ppt"],1e-12, "prefix_only", ["<1>"]],
-//   "<ppq>" :  [["ppq"],1e-15, "prefix_only", ["<1>"]],
-//   "<gross>" :  [["gr","gross"],144.0, "prefix_only", ["<dozen>","<dozen>"]],
-//   "<decibel>"  : [["dB","decibel","decibels"], 1.0, "logarithmic", ["<decibel>"]]
-// };
 
 // /**
 //  * Asserts unit definition is valid
@@ -340,59 +343,36 @@ var baseUnits = []string{"<meter>", "<kilogram>", "<second>", "<mole>", "<ampere
 //   });
 // }
 
-// /**
-//  * Returns a list of available units of kind
-//  *
-//  * @param {string} [kind] - kind of units
-//  * @returns {array} names of units
-//  * @throws {QtyError} if kind is unknown
-//  */
-// export function getUnits(kind) {
-//   var i;
-//   var units = [];
-//   var unitKeys = Object.keys(UNITS);
-//   if (typeof kind === "undefined") {
-//     for (i = 0; i < unitKeys.length; i++) {
-//       if (["", "prefix"].indexOf(UNITS[unitKeys[i]][2]) === -1) {
-//         units.push(unitKeys[i].substr(1, unitKeys[i].length - 2));
-//       }
-//     }
-//   }
-//   else if (this.getKinds().indexOf(kind) === -1) {
-//     throw new QtyError("Kind not recognized");
-//   }
-//   else {
-//     for (i = 0; i < unitKeys.length; i++) {
-//       if (UNITS[unitKeys[i]][2] === kind) {
-//         units.push(unitKeys[i].substr(1, unitKeys[i].length - 2));
-//       }
-//     }
-//   }
+// returns a list of available units of kind
+// returns an empty list if kind is unknown
+func Units(kind string) []string {
+	var result []string
+	for name, unit := range units {
+		if kind == "" || unit.kind == kind {
+			result = append(result, name)
+		}
+	}
+	slices.Sort(result)
+	return result
+}
 
-//   return units.sort(function(a, b) {
-//     if (a.toLowerCase() < b.toLowerCase()) {
-//       return -1;
-//     }
-//     if (a.toLowerCase() > b.toLowerCase()) {
-//       return 1;
-//     }
-//     return 0;
-//   });
-// }
+// returns a list of unit aliases
+// returns an empty list if unit is unknown
+func UnitAliases(unit string) []string {
+	if u, ok := units[unit]; ok {
+		return u.aliases
+	}
+	return nil
+}
 
-// /**
-//  * Returns a list of alternative names for a unit
-//  *
-//  * @param {string} unitName - name of unit
-//  * @returns {string[]} aliases for unit
-//  * @throws {QtyError} if unit is unknown
-//  */
-// export function getAliases(unitName) {
-//   if (!UNIT_MAP[unitName]) {
-//     throw new QtyError("Unit not recognized");
-//   }
-//   return UNITS[UNIT_MAP[unitName]][0];
-// }
+// returns a list of unit aliases
+// returns an empty list if unit is unknown
+func PrefixAliases(prefix string) []string {
+	if p, ok := prefixes[prefix]; ok {
+		return p.aliases
+	}
+	return nil
+}
 
 func makeUnitAliasMap(units map[string]Unit) map[string]string {
 	result := make(map[string]string)
