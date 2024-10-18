@@ -149,7 +149,7 @@ func TestMul(t *testing.T) {
 		"2.5m * 0.0": {"2.5m", "0.0", "0 m"},
 		// unlike
 		"10S * 0m":          {"2.5m", "0m", "0 m^2"},
-		"2.5m * 3N":         {"2.5m", "3N", "7.5 m*M"},
+		"2.5m * 3N":         {"2.5m", "3N", "7.5 m*N"},
 		"2.5 m^2 * 3kg/m^2": {"2.5 m^2", "3kg/m^2", "7.5 kg"},
 		// inverse
 		"10S * 2/S":   {"10S", "2/S", "20"},
@@ -207,12 +207,12 @@ func TestDiv(t *testing.T) {
 		expected string
 	}{
 		// degrees
-		"7.5degF / 2.5m^2":  {"7.5degF", "2.5m^2", "3 degF/m^2"},
-		"2.5 degF / 0 degF": {"2.5 degF", "0 defF", "divide by zero"},
+		"7.5degF / 2.5m^2":  {"7.5degF", "2.5m^2", "3 \u00b0F/m^2"},
+		"2.5 degF / 0 degF": {"2.5 degF", "0 degF", "divide by zero"},
 		"2.5 degF / 0":      {"2.5 degF", "0", "divide by zero"},
 		"2.5 degF / 4degF":  {"2.5 degF", "4degF", "0.625"},
-		"2.5 degF / 4":      {"2.5 degF", "4", "0.625 degF"},
-		"2.5 degF / 2 degC": {"2.5 degF", "2 degC", "1.25 degF/degC"},
+		"2.5 degF / 4":      {"2.5 degF", "4", "0.625 \u00b0F"},
+		"2.5 degF / 2 degC": {"2.5 degF", "2 degC", "1.25 \u00b0F/\u00b0C"},
 		// temperature
 		"tempF / 1 tempC": {"tempF", "1 tempC", "cannot divide with temperatures"},
 		"tempF / 1 degC":  {"tempF", "1 degC", "cannot divide with temperatures"},

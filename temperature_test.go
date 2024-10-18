@@ -6,126 +6,39 @@ import (
 )
 
 func TestTemperatureBaseUnit(t *testing.T) {
-	qty, err := NewQty(1, "tempK")
-	if err != nil {
-		t.Errorf("failed to create '1 tempK'")
+	tests := map[string]struct {
+		q      string
+		scalar float64
+		unit   string
+	}{
+		"1 tempK": {"1 tempK", 1, "tempK"},
+		"1 tempR": {"1 tempR", 5.0 / 9.0, "tempK"},
+		"0 tempC": {"0 tempC", 273.15, "tempK"},
+		"0 tempF": {"0 tempF", 255.372, "tempK"},
+		"1 degK":  {"1 degK", 1, "\u00b0K"},
+		"1 degR":  {"1 degR", 5.0 / 9.0, "\u00b0K"},
+		"1 degC":  {"1 degC", 1, "\u00b0K"},
+		"1 degF":  {"1 degF", 5.0 / 9.0, "\u00b0K"},
 	}
-	base, err := qty.ToBase()
-	if err != nil {
-		t.Errorf("failed to convert to base")
-	}
-	if base.scalar != 1 {
-		t.Errorf("expected scalar %v, got %v", 1, base.scalar)
-	}
-	if base.Units() != "tempK" {
-		t.Errorf("expected units %v, got %v", "tempK", base.Units())
-	}
-
-	qty, err = NewQty(1, "tempR")
-	if err != nil {
-		t.Errorf("failed to create '1 tempR'")
-	}
-	base, err = qty.ToBase()
-	if err != nil {
-		t.Errorf("failed to convert to base")
-	}
-	if base.scalar != 5.0/9.0 {
-		t.Errorf("expected scalar %v, got %v", 5.0/9.0, base.scalar)
-	}
-	if base.Units() != "tempK" {
-		t.Errorf("expected units %v, got %v", "tempK", base.Units())
-	}
-
-	qty, err = NewQty(0, "tempC")
-	if err != nil {
-		t.Errorf("failed to create '0 tempC'")
-	}
-	base, err = qty.ToBase()
-	if err != nil {
-		t.Errorf("failed to convert to base")
-	}
-	if base.scalar != 273.15 {
-		t.Errorf("expected scalar %v, got %v", 273.15, base.scalar)
-	}
-	if base.Units() != "tempK" {
-		t.Errorf("expected units %v, got %v", "tempK", base.Units())
-	}
-
-	qty, err = NewQty(0, "tempF")
-	if err != nil {
-		t.Errorf("failed to create '0 tempF'")
-	}
-	base, err = qty.ToBase()
-	if err != nil {
-		t.Errorf("failed to convert to base")
-	}
-	if math.Abs(base.scalar-255.372) > 0.001 {
-		t.Errorf("expected scalar %v, got %v", 255.372, base.scalar)
-	}
-	if base.Units() != "tempK" {
-		t.Errorf("expected units %v, got %v", "tempK", base.Units())
-	}
-}
-
-func TestDegreesBaseUnit(t *testing.T) {
-	qty, err := NewQty(1, "degK")
-	if err != nil {
-		t.Errorf("failed to create '1 degK'")
-	}
-	base, err := qty.ToBase()
-	if err != nil {
-		t.Errorf("failed to convert to base")
-	}
-	if base.scalar != 1 {
-		t.Errorf("expected scalar %v, got %v", 1, base.scalar)
-	}
-	if base.Units() != "degK" {
-		t.Errorf("expected units %v, got %v", "degK", base.Units())
-	}
-
-	qty, err = NewQty(1, "degR")
-	if err != nil {
-		t.Errorf("failed to create '1 degR'")
-	}
-	base, err = qty.ToBase()
-	if err != nil {
-		t.Errorf("failed to convert to base: %v", err)
-	}
-	if base.scalar != 5.0/9.0 {
-		t.Errorf("expected scalar %v, got %v", 5.0/9.0, base.scalar)
-	}
-	if base.Units() != "degK" {
-		t.Errorf("expected units %v, got %v", "degK", base.Units())
-	}
-
-	qty, err = NewQty(1, "degC")
-	if err != nil {
-		t.Errorf("failed to create '0 degC'")
-	}
-	base, err = qty.ToBase()
-	if err != nil {
-		t.Errorf("failed to convert to base")
-	}
-	if base.scalar != 1 {
-		t.Errorf("expected scalar %v, got %v", 1, base.scalar)
-	}
-	if base.Units() != "degK" {
-		t.Errorf("expected units %v, got %v", "degK", base.Units())
-	}
-
-	qty, err = NewQty(1, "degF")
-	if err != nil {
-		t.Errorf("failed to create '0 degF'")
-	}
-	base, err = qty.ToBase()
-	if err != nil {
-		t.Errorf("failed to convert to base")
-	}
-	if base.scalar != 5.0/9.0 {
-		t.Errorf("expected scalar %v, got %v", 5.0/9.0, base.scalar)
-	}
-	if base.Units() != "degK" {
-		t.Errorf("expected units %v, got %v", "degK", base.Units())
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			qty, err := ParseQty(test.q)
+			if err != nil {
+				t.Errorf("failed to create %v", test.q)
+			}
+			base, err := qty.ToBase()
+			if err != nil {
+				t.Errorf("failed to convert to base, got %v", err)
+			} else {
+				if math.Abs(base.scalar-test.scalar) > 0.001 {
+					t.Errorf("expected scalar %v, got %v", test.scalar, base.scalar)
+				}
+				u := base.Units()
+				if base.Units() != test.unit {
+					t.Errorf("expected units %v, got %v", test.unit, u)
+				}
+			}
+		})
 	}
 }
 

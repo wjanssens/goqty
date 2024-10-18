@@ -122,16 +122,57 @@ q.ToPrec("0.00001 ft");     // => 5.17 ft
 q.ToPrec("2 ft");           // => 6 ft
 q.ToPrec("2");              // => 6 ft
 
-q, _ = q.Parse("6.3782 m");
+q, _ = qty.Parse("6.3782 m");
 q.ToPrec("dm");             // => 6.4 m
 q.ToPrec("cm");             // => 6.38 m
 q.ToPrec("mm");             // => 6.378 m
 q.ToPrec("5 cm");           // => 6.4 m
 q.ToPrec("10 m");           // => 10 m
-// qty.ToPrec(0.1); // => 6.3 m
+qty.ToPrec(0.1);            // => 6.3 m
 
-q, _ = qty.ParseQty("1.146 MPa");
-qty.ToPrec("0.1 bar");      // => 1.15 MPa
+q, _ = qty.Parse("1.146 MPa");
+q.ToPrec("0.1 bar");        // => 1.15 MPa
+----
+
+.Formatting
+[source,go]
+----
+// String() can be used to get the cannonical representation of the quantity, which can always be parsed
+q.String()                     // 1.146 MPa => "1.146 MPa"
+q.Format(qty.DefaultFormatter) // 1.146 MPa => "1.146 MPa"
+
+fn := func(scalar float64, unit string) string {
+    v := number.Decimal(scalar, number.MaxIntegerDigits(4), number.MinIntegerDigits(2))
+    return message.NewPrinter(language.Dutch).Sprintf("%v %v", v, unit)
+}
+f := q.Format(fn)               // 2.987654321 m => 02,988 m
+----
+
+.Temperature
+qoqty makes a distinction between a temperature and degrees of a temperature.
+Temperature units (eg tempC) can be converted back and forth, and will take into account the differences in the zero points of the various scales.  Differential temperature degree (eg degC) units behave like most other units.
+It is an error to create a temperature below absolute zero.
+Math with temperatures is fairly limited.
+[source,go]
+----
+t100, _ := qty.Parse("100 tempC")
+t100.Add("10 degC")             // 110 tempC; temp + deg is always safe 
+t100.Sub("10 degC")             // 90 tempC;  temp - deg is always safe
+t100.Add("50 tempC")            // error; can't add two temperatures
+t100.Sub("50 tempC")            // 50 degC
+t100.Sub("150 tempC")           // -50 degC
+t100.Mul(2)                     // 200 tempC
+t100.Div(2)                     // 50 tempC
+t100.Inverse()                  // error
+t100.Mul(qty)                   // error
+t100.Div(qty)                   // error
+qty.Parse("100 tempC*unit")     // error
+qty.Parse("100 tempC/unit")     // error
+qty.Parse("100 unit/tempC")     // error
+t100.To("degC")                 // 100 degC; references the 0 point on the scale of the temperature unit
+
+d100, _ := qty.Parse("100 degC")
+d100.To("tempC")                // -173.15 tempC; interpreted as being relative to absolute zero
 ----
 
 .Kinds and Units

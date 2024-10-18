@@ -151,10 +151,10 @@ var units = map[string]Unit{
 	"<Gal>": makeUnit("acceleration", []string{"Gal"}, 1e-2, []string{"<meter>"}, []string{"<second>", "<second>"}),
 
 	// temperature_difference
-	"<kelvin>":     makeUnit("temperature", []string{"degK", "kelvin"}, 1.0, []string{"<kelvin>"}, nil),
-	"<celsius>":    makeUnit("temperature", []string{"degC", "celsius", "celsius", "centigrade"}, 1.0, []string{"<kelvin>"}, nil),
-	"<fahrenheit>": makeUnit("temperature", []string{"degF", "fahrenheit"}, 5.0/9.0, []string{"<kelvin>"}, nil),
-	"<rankine>":    makeUnit("temperature", []string{"degR", "rankine"}, 5.0/9.0, []string{"<kelvin>"}, nil),
+	"<kelvin>":     makeUnit("temperature", []string{"\u00b0K", "degK", "kelvin"}, 1.0, []string{"<kelvin>"}, nil),
+	"<celsius>":    makeUnit("temperature", []string{"\u00b0C", "degC", "celsius", "celsius", "centigrade"}, 1.0, []string{"<kelvin>"}, nil),
+	"<fahrenheit>": makeUnit("temperature", []string{"\u00b0F", "degF", "fahrenheit"}, 5.0/9.0, []string{"<kelvin>"}, nil),
+	"<rankine>":    makeUnit("temperature", []string{"\u00b0R", "degR", "rankine"}, 5.0/9.0, []string{"<kelvin>"}, nil),
 	"<temp-K>":     makeUnit("temperature", []string{"tempK", "temp-K"}, 1.0, []string{"<temp-K>"}, nil),
 	"<temp-C>":     makeUnit("temperature", []string{"tempC", "temp-C"}, 1.0, []string{"<temp-K>"}, nil),
 	"<temp-F>":     makeUnit("temperature", []string{"tempF", "temp-F"}, 5.0/9.0, []string{"<temp-K>"}, nil),
@@ -233,7 +233,7 @@ var units = map[string]Unit{
 
 	// angle
 	"<radian>":    makeUnit("angle", []string{"rad", "radian", "radians"}, 1.0, []string{"<radian>"}, nil),
-	"<degree>":    makeUnit("angle", []string{"deg", "degree", "degrees"}, math.Pi/180.0, []string{"<radian>"}, nil),
+	"<degree>":    makeUnit("angle", []string{"\u00b0", "deg", "degree", "degrees"}, math.Pi/180.0, []string{"<radian>"}, nil),
 	"<arcminute>": makeUnit("angle", []string{"arcmin", "arcminute", "arcminutes"}, math.Pi/10800.0, []string{"<radian>"}, nil),
 	"<arcsecond>": makeUnit("angle", []string{"arcsec", "arcsecond", "arcseconds"}, math.Pi/648000.0, []string{"<radian>"}, nil),
 	"<gradian>":   makeUnit("angle", []string{"gon", "grad", "gradian", "grads"}, math.Pi/200.0, []string{"<radian>"}, nil),
