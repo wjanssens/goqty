@@ -57,78 +57,91 @@ qty, err = ParseQty("1.5 Ω");
 qty = Qty("1 attoparsec/microfortnight");
 ----
 
-.Kinds
+.Properties
 [source,go]
 ----
-// get a list of well-known kinds of units
-kinds := goqty.Kinds()
-
-// get the kind of a quantity
-if qty, err := goqty.ParseQty("5m"); err == nil {
-    fmt.Printf("kind %v\n", qty.Kind())
-}
+c := a.Scalar()         // returns the scalar of a quantity (10 m => 10)
+u := a.Units()          // returns the units of a quantity (10 m => m)
+k := a.Kind()           // returns the kind of a quantity (10 m => length)
 ----
 
-.Units
+.Predicates
 [source,go]
 ----
-// get a list of well-known kinds of units
-kinds := goqty.Units("length")
-
-// get the unit of a quantity
-if qty, err := goqty.ParseQty("5m"); err == nil {
-    fmt.Printf("unit %v\n", qty.Unit())
-}
+t := a.IsInverse(b)     // true if quantities are the inverse of each other
+t := a.IsCompatible(b)  // true if quantities have the same kind
+t := a.IsUnitless()     // true if quantity has no units
+t := a.IsBase()         // true if quantity is represented with base units
 ----
 
+.Conversion
+[source,go]
+----
+c, err := a.To('m')      // returns a scaled quantity (0.1 m => 10 cm)
+c, err := a.To('S')      // returns an inverted quantity (10 ohm => .1 S)
+c, err := a.ToBase()     // returns a quantity in SI units (10 cm => 0.1 m)
+c, err := a.ToFloat()    // returns the scalar of a unitless quantity
+c, err := a.Inverse()    // returns an interned quantity (100 m/s => .01 s/m; 10 ohm => .1 /ohm, not .1 S)
+----
 
-// ### Available units of a particular kind
+.Comparison
+[source,go]
+----
+// quantities with compatible quantities can be compared
+eq, err := a.Eq(b)          // true if both quantities are equal (1m == 100cm => true)
+same, err := a.Same(b)      // true if both quantities are same (1m == 100cm => false)
+lt, err := a.Lt(b)          // true if a is stricty less than b
+lte, err := a.Lte(b)        // true if a is less than or equal to b
+gt, err := a.Gt(b)          // true if a is stricty greater than b
+gte, err := a.Gte(b)        // true if a is greater than or equal to b
+v, err := a.compareTo(b);   // -1 if a < b, 0 if a == b, 1 if a > b
+----
 
-// ```javascript
-// Qty.getUnits('currency'); // => [ 'dollar', 'cents' ]
-// // Or all alphabetically sorted
-// Qty.getUnits(); // => [ 'acre','Ah','ampere','AMU','angstrom']
-// ```
+.Operators
+[source,go]
+----
+// quantities with compatible quantities can be added and substracted
+c, err := a.Add(b)          // 2.5 m + 3 cm => 2.53 m ; 3 cm + 2.5 m => 253 cm
+c, err := a.Sub(b)          // 2.5 m - 3 cm => 2.47 m ; 3 cm - 2.5 m => -247 cm
+// any quantities can be multiplied and divided (excluding temperatures)
+c, err := a.Mul(b)          // 2.5 m * 3 cm => 0.075 m^2 ; 3 cm * 2.5 m => 750 cm^2
+c, err := a.Div(b)          // 7.5 degF / 2.5 m^2 => 3 degF/m^2
+----
 
-// ### Alternative names of a unit
+.Rounding
+[source,go]
+----
+q, _ := qty.Parse("5.17 ft")
+q.ToPrec("ft");             // => 5 ft
+q.ToPrec("0.5 ft");         // => 5 ft
+q.ToPrec("0.25 ft");        // => 5.25 ft
+q.ToPrec("0.1 ft");         // => 5.2 ft
+q.ToPrec("0.05 ft");        // => 5.15 ft
+q.ToPrec("0.01 ft");        // => 5.17 ft
+q.ToPrec("0.00001 ft");     // => 5.17 ft
+q.ToPrec("2 ft");           // => 6 ft
+q.ToPrec("2");              // => 6 ft
 
-// ```javascript
-// Qty.getAliases('m'); // => [ 'm', 'meter', 'meters', 'metre', 'metres' ]
-// ```
+q, _ = q.Parse("6.3782 m");
+q.ToPrec("dm");             // => 6.4 m
+q.ToPrec("cm");             // => 6.38 m
+q.ToPrec("mm");             // => 6.378 m
+q.ToPrec("5 cm");           // => 6.4 m
+q.ToPrec("10 m");           // => 10 m
+// qty.ToPrec(0.1); // => 6.3 m
 
-// ### Quantity compatibility, kind and various queries
+q, _ = qty.ParseQty("1.146 MPa");
+qty.ToPrec("0.1 bar");      // => 1.15 MPa
+----
 
-// ```javascript
-// qty1.isCompatible(qty2); // => true or false
+.Kinds and Units
+[source,go]
+----
+k := qty.Kinds()            // a list of kinds of units (length, area, volume, time, ...)
+u := qty.Units("length")    // a list of units of a kind (meter, inch, foot, mile, ...)
+a := qty.Aliases("m")       // a list of unit aliases (m, meter, meters, metre, metres)
+----
 
-// qty.kind(); // => 'length', 'area', etc...
-
-// qty.isUnitless(); // => true or false
-// qty.isBase(); // => true if quantity is represented with base units
-// ```
-
-// ### Conversion
-
-// ```javascript
-// qty.toBase(); // converts to SI units (10 cm => 0.1 m) (new instance)
-
-// qty.toFloat(); // returns scalar of unitless quantity
-//                // (otherwise throws error)
-
-// qty.to('m'); // converts quantity to meter if compatible
-//              // or throws an error (new instance)
-// qty1.to(qty2); // converts quantity to same unit of qty2 if compatible
-//                // or throws an error (new instance)
-
-// qty.inverse(); // converts quantity to its inverse
-//                // ('100 m/s' => '.01 s/m')
-// // Inverses can be used, but there is no special checking to
-// // rename the units
-// Qty('10ohm').inverse() // '.1/ohm'
-//                        // (not '.1S', although they are equivalent)
-// // however, the 'to' command will convert between inverses also
-// Qty('10ohm').to('S') // '.1S'
-// ```
 
 // `Qty.swiftConverter()` is a fast way to efficiently convert large array of
 // Number values. It configures a function accepting a value or an array of Number
@@ -147,27 +160,6 @@ if qty, err := goqty.ParseQty("5m"); err == nil {
 // The main drawback of this conversion method is that it does not take care of
 // rounding issues.
 
-// ### Comparison
-
-// ```javascript
-// qty1.eq(qty2); // => true if both quantities are equal (1m == 100cm => true)
-// qty1.same(qty2); // => true if both quantities are same (1m == 100cm => false)
-// qty1.lt(qty2); // => true if qty1 is stricty less than qty2
-// qty1.lte(qty2); // => true if qty1 is less than or equal to qty2
-// qty1.gt(qty2); // => true if qty1 is stricty greater than qty2
-// qty1.gte(qty2); // => true if qty1 is greater than or equal to qty2
-
-// qty1.compareTo(qty2); // => -1 if qty1 < qty2,
-//                       // => 0 if qty1 == qty2,
-//                       // => 1 if qty1 > qty2
-// ```
-
-// ### Operators
-
-// * add(other): Add. other can be string or quantity. other should be unit compatible.
-// * sub(other): Substract. other can be string or quantity. other should be unit compatible.
-// * mul(other): Multiply. other can be string, number or quantity.
-// * div(other): Divide. other can be string, number or quantity.
 
 // ### Rounding
 

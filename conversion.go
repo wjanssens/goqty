@@ -6,10 +6,23 @@ import (
 	"sync"
 )
 
-var conversionCache sync.Map
+// var conversionCache sync.Map
 var baseUnitCache sync.Map
 
-func (q *Qty) To(units string) (*Qty, error) {
+func (q *Qty) To(other interface{}) (*Qty, error) {
+	var o *Qty
+	var err error
+	switch t := other.(type) {
+	case *Qty:
+		o = other.(*Qty)
+	case string:
+		if o, err = ParseQty(other.(string)); err != nil {
+			return nil, err
+		}
+	default:
+		return nil, fmt.Errorf("expecting string or *Qty, got %T", t)
+	}
+
 	// TODO conversion cache has to be a member of Qty, not global
 	// if cached, found := conversionCache.Load(units); found {
 	// 	result := cached.(*Qty)
@@ -17,7 +30,7 @@ func (q *Qty) To(units string) (*Qty, error) {
 	// }
 
 	// Instantiating target to normalize units
-	target, err := NewQty(1, units)
+	target, err := NewQty(1, o.Units())
 	if err != nil {
 		return target, err
 	} else if target.Units() == q.Units() {
@@ -27,11 +40,11 @@ func (q *Qty) To(units string) (*Qty, error) {
 	if !q.IsCompatible(target) {
 		if q.IsInverse(target) {
 			i, _ := q.Inverse()
-			if target, err = i.To(units); err != nil {
+			if target, err = i.To(o); err != nil {
 				return target, err
 			}
 		} else {
-			return target, fmt.Errorf("incompatible units %v, %v", q.Units(), target.Units())
+			return target, fmt.Errorf("incompatible units: %v and %v", q.Units(), target.Units())
 		}
 	} else {
 		if target.IsTemperature() {
@@ -90,37 +103,41 @@ func (q *Qty) ToFloat() (float64, error) {
 	}
 }
 
-/**
- * Returns the nearest multiple of quantity passed as
- * precision
- *
- * @param {(Qty|string|number)} precQuantity - Quantity, string formated
- *   quantity or number as expected precision
- *
- * @returns {Qty} Nearest multiple of precQuantity
- *
- * @example
- * Qty('5.5 ft').toPrec('2 ft'); // returns 6 ft
- * Qty('0.8 cu').toPrec('0.25 cu'); // returns 0.75 cu
- * Qty('6.3782 m').toPrec('cm'); // returns 6.38 m
- * Qty('1.146 MPa').toPrec('0.1 bar'); // returns 1.15 MPa
- *
- */
-func (q *Qty) ToPrec(precision *Qty) (*Qty, error) {
+// Returns the nearest multiple of quantity passed as precision
+// expects *Qty|string|number as input
+//
+// Qty('5.5 ft').ToPrec('2 ft'); // returns 6 ft
+// Qty('0.8 cu').toPrec('0.25 cu'); // returns 0.75 cu
+// Qty('6.3782 m').ToPrec('cm'); // returns 6.38 m
+// Qty('1.146 MPa').ToPrec('0.1 bar'); // returns 1.15 MPa
+func (q *Qty) ToPrec(precision interface{}) (*Qty, error) {
+	var p *Qty
 	var err error
-	if !q.IsUnitless() {
-		if precision, err = precision.To(q.Units()); err != nil {
+	switch t := precision.(type) {
+	case float64:
+		return newQty(mulSafe(precision.(float64), q.scalar), q.numerator, q.denominator)
+	case *Qty:
+		p = precision.(*Qty)
+	case string:
+		if p, err = ParseQty(precision.(string)); err != nil {
 			return nil, err
 		}
-	} else if !precision.IsUnitless() {
-		return nil, fmt.Errorf("incompatible Units %v, %v", q.Units(), precision.Units())
+	default:
+		return nil, fmt.Errorf("expected float64, string, or *Qty, got %T", t)
+	}
+	if !q.IsUnitless() {
+		if p, err = p.To(q.Units()); err != nil {
+			return nil, err
+		}
+	} else if !p.IsUnitless() {
+		return nil, fmt.Errorf("incompatible units: %v and %v", q.Units(), p.Units())
 	}
 
-	if precision.scalar == 0 {
+	if p.scalar == 0 {
 		return nil, fmt.Errorf("divide by zero")
 	}
 
-	resultScalar := mulSafe(math.Round(q.scalar/precision.scalar), precision.scalar)
+	resultScalar := mulSafe(math.Round(q.scalar/p.scalar), p.scalar)
 
 	return NewQty(resultScalar, q.Units())
 }
@@ -151,12 +168,13 @@ func SwiftConverter(srcUnits, dstUnits string) (converter func(values []float64)
 	var dstQty *Qty
 	if srcQty, err = ParseQty(srcUnits); err != nil {
 		return converter, err
-	}
-	if dstQty, err = ParseQty(dstUnits); err != nil {
+	} else if dstQty, err = ParseQty(dstUnits); err != nil {
 		return converter, err
 	}
 
-	if srcQty.Eq(dstQty) {
+	if eq, err := srcQty.Eq(dstQty); err != nil {
+		return converter, err
+	} else if eq {
 		return func(values []float64) ([]float64, error) {
 			return values, nil
 		}, nil

@@ -9,13 +9,6 @@ import (
 	"sync"
 )
 
-// func Parse(expr string) Qty {
-
-// }
-// func NewQty(scalar float64, unit string) Qty {
-
-// }
-
 const sign = "[+-]"
 const integer = "\\d+"
 const signedInteger = sign + "?" + integer

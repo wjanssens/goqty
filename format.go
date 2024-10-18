@@ -102,7 +102,7 @@ func getOutputNames(units []string) []string {
 func simplify(units []string) []string {
 	// this turns ['s','m','s'] into ['s2','m']
 
-	// using 2 slices as a map doesn't have a defined iteration order
+	// using 2 slices since map doesn't have a defined iteration order
 	var k []string
 	var v []int
 

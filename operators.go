@@ -8,9 +8,6 @@ func (q *Qty) Add(input interface{}) (*Qty, error) {
 	var other *Qty
 	var err error
 	switch t := input.(type) {
-	case Qty:
-		cast := input.(Qty)
-		other = &cast
 	case *Qty:
 		other = input.(*Qty)
 	case string:
@@ -18,11 +15,11 @@ func (q *Qty) Add(input interface{}) (*Qty, error) {
 			return nil, err
 		}
 	default:
-		return nil, fmt.Errorf("cannot add type %T", t)
+		return nil, fmt.Errorf("expecting string or *Qty, got %T", t)
 	}
 
 	if !q.IsCompatible(other) {
-		return nil, fmt.Errorf("incompatible units %v, %v", q.Units(), other.Units())
+		return nil, fmt.Errorf("incompatible units: %v and %v", q.Units(), other.Units())
 	}
 
 	if q.IsTemperature() && other.IsTemperature() {
@@ -32,7 +29,7 @@ func (q *Qty) Add(input interface{}) (*Qty, error) {
 	} else if other.IsTemperature() {
 		return addTempDegrees(other, q)
 	}
-	if to, err := other.To(q.Units()); err != nil {
+	if to, err := other.To(q); err != nil {
 		return nil, err
 	} else {
 		return newQty(q.scalar+to.scalar, q.numerator, q.denominator)
@@ -43,9 +40,6 @@ func (q *Qty) Sub(input interface{}) (*Qty, error) {
 	var other *Qty
 	var err error
 	switch t := input.(type) {
-	case Qty:
-		cast := input.(Qty)
-		other = &cast
 	case *Qty:
 		other = input.(*Qty)
 	case string:
@@ -53,11 +47,11 @@ func (q *Qty) Sub(input interface{}) (*Qty, error) {
 			return nil, err
 		}
 	default:
-		return nil, fmt.Errorf("cannot add type %T", t)
+		return nil, fmt.Errorf("expecting type string or *Qty, got %T", t)
 	}
 
 	if !q.IsCompatible(other) {
-		return nil, fmt.Errorf("incompatible units %v, %v", q.Units(), other.Units())
+		return nil, fmt.Errorf("incompatible units: %v and %v", q.Units(), other.Units())
 	}
 
 	if q.IsTemperature() && other.IsTemperature() {
@@ -68,7 +62,7 @@ func (q *Qty) Sub(input interface{}) (*Qty, error) {
 		return nil, fmt.Errorf("cannot subtract a temperature from a differential degree unit")
 	}
 
-	if to, err := other.To(q.Units()); err != nil {
+	if to, err := other.To(q); err != nil {
 		return nil, err
 	} else {
 		return newQty(q.scalar-to.scalar, q.numerator, q.denominator)
@@ -81,13 +75,6 @@ func (q *Qty) Mul(input interface{}) (*Qty, error) {
 	switch t := input.(type) {
 	case float64:
 		return newQty(mulSafe(input.(float64), q.scalar), q.numerator, q.denominator)
-	case float32:
-		return newQty(mulSafe(float64(input.(float32)), q.scalar), q.numerator, q.denominator)
-	case int:
-		return newQty(mulSafe(float64(input.(int)), q.scalar), q.numerator, q.denominator)
-	case Qty:
-		cast := input.(Qty)
-		other = &cast
 	case *Qty:
 		other = input.(*Qty)
 	case string:
@@ -95,7 +82,7 @@ func (q *Qty) Mul(input interface{}) (*Qty, error) {
 			return nil, err
 		}
 	default:
-		return nil, fmt.Errorf("cannot multiply type %T", t)
+		return nil, fmt.Errorf("expecting float64, string, or *Qty, got %T", t)
 	}
 
 	if (q.IsTemperature() || other.IsTemperature()) && !(q.IsUnitless() || other.IsUnitless()) {
@@ -132,23 +119,6 @@ func (q *Qty) Div(input interface{}) (*Qty, error) {
 		} else {
 			return newQty(q.scalar/scalar, q.numerator, q.denominator)
 		}
-	case float32:
-		scalar := float64(input.(float32))
-		if scalar == 0 {
-			return nil, fmt.Errorf("divide by zero")
-		} else {
-			return newQty(q.scalar/scalar, q.numerator, q.denominator)
-		}
-	case int:
-		scalar := float64(input.(int))
-		if scalar == 0 {
-			return nil, fmt.Errorf("divide by zero")
-		} else {
-			return newQty(q.scalar/scalar, q.numerator, q.denominator)
-		}
-	case Qty:
-		cast := input.(Qty)
-		other = &cast
 	case *Qty:
 		other = input.(*Qty)
 	case string:
@@ -156,7 +126,7 @@ func (q *Qty) Div(input interface{}) (*Qty, error) {
 			return nil, err
 		}
 	default:
-		return nil, fmt.Errorf("cannot multiply type %T", t)
+		return nil, fmt.Errorf("expecting float64, string, or *Qty, got %T", t)
 	}
 
 	if other.scalar == 0 {
@@ -187,7 +157,7 @@ func (q *Qty) Div(input interface{}) (*Qty, error) {
 	}
 }
 
-// // Returns a Qty that is the inverse of this Qty,
+// Returns a Qty that is the inverse of this Qty,
 func (q *Qty) Inverse() (*Qty, error) {
 	if q.IsTemperature() {
 		return nil, fmt.Errorf("cannot divide with temperatures")
@@ -247,7 +217,6 @@ func cleanTerms(num1, den1, num2, den2 []string) (num []string, den []string, sc
 					if v, err := divSafe(prefixValue, combinedPrefixValue); err != nil {
 						// prefix scalars are never zero, so division by zero can't happen
 						// TODO return error?
-						fmt.Printf("here %v\n", err)
 					} else {
 						if direction == 1 {
 							c.num *= v

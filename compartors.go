@@ -2,32 +2,50 @@ package goqty
 
 import "fmt"
 
-func (q *Qty) Eq(other *Qty) bool {
-	if i, err := q.CompareTo(other); err == nil && i == 0 {
-		return true
+func (q *Qty) Eq(other interface{}) (bool, error) {
+	if i, err := q.CompareTo(other); err != nil {
+		return false, err
+	} else if i == 0 {
+		return true, nil
 	} else {
-		return false
+		return false, nil
 	}
 }
-func (q *Qty) Lt(other *Qty) bool {
-	if i, err := q.CompareTo(other); err == nil && i == -1 {
-		return true
+func (q *Qty) Lt(other interface{}) (bool, error) {
+	if i, err := q.CompareTo(other); err != nil {
+		return false, err
+	} else if i == -1 {
+		return true, nil
 	} else {
-		return false
+		return false, nil
 	}
 }
-func (q *Qty) Lte(other *Qty) bool {
-	return q.Eq(other) || q.Lt(other)
-}
-func (q *Qty) Gt(other *Qty) bool {
-	if i, err := q.CompareTo(other); err == nil && i == 1 {
-		return true
+func (q *Qty) Lte(other interface{}) (bool, error) {
+	if eq, err := q.Eq(other); err != nil {
+		return false, err
+	} else if lt, err := q.Lt(other); err != nil {
+		return false, err
 	} else {
-		return false
+		return eq || lt, nil
 	}
 }
-func (q *Qty) Gte(other *Qty) bool {
-	return q.Eq(other) || q.Gt(other)
+func (q *Qty) Gt(other interface{}) (bool, error) {
+	if i, err := q.CompareTo(other); err != nil {
+		return false, err
+	} else if i == 1 {
+		return true, nil
+	} else {
+		return false, nil
+	}
+}
+func (q *Qty) Gte(other interface{}) (bool, error) {
+	if eq, err := q.Eq(other); err != nil {
+		return false, err
+	} else if gt, err := q.Gt(other); err != nil {
+		return false, err
+	} else {
+		return eq || gt, nil
+	}
 }
 
 // Compare two Qty objects. Throws an exception if they are not of compatible types.
@@ -43,13 +61,26 @@ func (q *Qty) Gte(other *Qty) bool {
 //	  Qty("10ohm").Inverse().CompareTo(ParseQty("10S")) == -1
 //
 //	If including inverses in the sort is needed, I suggest writing: Qty.sort(qtyArray,units)
-func (q *Qty) CompareTo(other *Qty) (int, error) {
-	if !q.IsCompatible(other) {
-		return 0, fmt.Errorf("incompatible units %v %v", q.units, other.units)
+func (q *Qty) CompareTo(other interface{}) (int, error) {
+	var o *Qty
+	var err error
+	switch t := other.(type) {
+	case *Qty:
+		o = other.(*Qty)
+	case string:
+		if o, err = ParseQty(other.(string)); err != nil {
+			return 0, err
+		}
+	default:
+		return 0, fmt.Errorf("expecting string or *Qty, got %T", t)
 	}
-	if q.baseScalar < other.baseScalar {
+
+	if !q.IsCompatible(o) {
+		return 0, fmt.Errorf("incompatible units: %v and %v", q.Units(), o.Units())
+	}
+	if q.baseScalar < o.baseScalar {
 		return -1, nil
-	} else if q.baseScalar > other.baseScalar {
+	} else if q.baseScalar > o.baseScalar {
 		return 1, nil
 	} else {
 		return 0, nil
@@ -59,6 +90,18 @@ func (q *Qty) CompareTo(other *Qty) (int, error) {
 // Return true if quantities and units match
 // Unit("100 cm").same(Unit("100 cm"))  # => true
 // Unit("100 cm").same(Unit("1 m"))     # => false
-func (q *Qty) Same(other Qty) bool {
-	return (q.scalar == other.scalar) && (q.units == other.units)
+func (q *Qty) Same(other interface{}) (bool, error) {
+	var o *Qty
+	var err error
+	switch t := other.(type) {
+	case *Qty:
+		o = other.(*Qty)
+	case string:
+		if o, err = ParseQty(other.(string)); err != nil {
+			return false, err
+		}
+	default:
+		return false, fmt.Errorf("expecting string or *Qty, got %T", t)
+	}
+	return (q.scalar == o.scalar) && (q.units == o.units), nil
 }
