@@ -1,6 +1,10 @@
 package qty
 
-import "testing"
+import (
+	"math"
+	"slices"
+	"testing"
+)
 
 func TestTo(t *testing.T) {
 	tests := map[string]struct {
@@ -82,4 +86,24 @@ func TestToPrec(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestSwiftConverter(t *testing.T) {
+	if converter, err := SwiftConverter("m/h", "ft/s"); err != nil {
+		t.Errorf("failed to create converter, got %v", err)
+	} else {
+		if actual, err := converter([]float64{2500, 5000}); err != nil {
+			t.Errorf("failed to convert, got %v", err)
+		} else {
+			expected := []float64{2.278, 4.556}
+			if !slices.EqualFunc(actual, expected, func(a, b float64) bool {
+				return math.Abs(a-b) < 0.001
+			}) {
+				t.Errorf("expected %v, got %v", expected, actual)
+			}
+			if !slices.Equal(actual, expected) {
+			}
+		}
+	}
+
 }

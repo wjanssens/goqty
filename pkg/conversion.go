@@ -201,7 +201,7 @@ func SwiftConverter(srcUnits, dstUnits string) (converter func(values []float64)
 	}
 
 	return func(values []float64) ([]float64, error) {
-		result := make([]float64, len(values))
+		var result []float64
 		for _, v := range values {
 			if c, err := convert(v); err != nil {
 				return result, err
