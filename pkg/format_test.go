@@ -1,4 +1,4 @@
-package goqty
+package qty
 
 import (
 	"testing"
@@ -9,7 +9,7 @@ import (
 )
 
 func TestDefaultFormatter(t *testing.T) {
-	qty, err := ParseQty("2.987654321 m")
+	qty, err := Parse("2.987654321 m")
 	if err != nil {
 		t.Errorf("failed to create '2.987654321 m', got %v", err)
 		return
@@ -26,7 +26,7 @@ func TestDefaultFormatter(t *testing.T) {
 }
 
 func TestFormatter(t *testing.T) {
-	qty, err := ParseQty("2.987654321 m")
+	qty, err := Parse("2.987654321 m")
 	if err != nil {
 		t.Errorf("failed to create '2.987654321 m', got %v", err)
 		return

@@ -1,4 +1,4 @@
-package goqty
+package qty
 
 import (
 	"fmt"
@@ -31,7 +31,7 @@ func subtractTemperatures(lhs, rhs *Qty) (*Qty, error) {
 	if err != nil {
 		return nil, err
 	}
-	dstDegrees, err := ParseQty(dstDegreeUnits)
+	dstDegrees, err := Parse(dstDegreeUnits)
 	if err != nil {
 		return nil, nil
 	}

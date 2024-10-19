@@ -1,4 +1,4 @@
-package goqty
+package qty
 
 import "testing"
 
@@ -24,12 +24,12 @@ func TestComparisson(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			a, err := ParseQty(test.a)
+			a, err := Parse(test.a)
 			if err != nil {
 				t.Errorf("failed to create %v, got %v", test.a, err)
 				return
 			}
-			b, err := ParseQty(test.b)
+			b, err := Parse(test.b)
 			if err != nil {
 				t.Errorf("failed to create %v, got %v", test.b, err)
 				return
@@ -88,12 +88,12 @@ func TestCompareTo(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			a, err := ParseQty(test.a)
+			a, err := Parse(test.a)
 			if err != nil {
 				t.Errorf("failed to create %v, got %v", test.a, err)
 				return
 			}
-			b, err := ParseQty(test.b)
+			b, err := Parse(test.b)
 			if err != nil {
 				t.Errorf("failed to create %v, got %v", test.b, err)
 				return
@@ -117,12 +117,12 @@ func TestCompareToError(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			a, err := ParseQty(test.a)
+			a, err := Parse(test.a)
 			if err != nil {
 				t.Errorf("failed to create %v, got %v", test.a, err)
 				return
 			}
-			b, err := ParseQty(test.b)
+			b, err := Parse(test.b)
 			if err != nil {
 				t.Errorf("failed to create %v, got %v", test.b, err)
 				return

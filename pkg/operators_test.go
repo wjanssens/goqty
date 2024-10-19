@@ -1,4 +1,4 @@
-package goqty
+package qty
 
 import (
 	"testing"
@@ -16,7 +16,7 @@ func TestInverse(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			a, err := ParseQty(test.expr)
+			a, err := Parse(test.expr)
 			if err != nil {
 				t.Errorf("failed to parse %v, got %v", test.expr, err)
 				return
@@ -50,12 +50,12 @@ func TestAdd(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			a, err := ParseQty(test.a)
+			a, err := Parse(test.a)
 			if err != nil {
 				t.Errorf("failed to parse %v, got %v", test.a, err)
 				return
 			}
-			b, err := ParseQty(test.b)
+			b, err := Parse(test.b)
 			if err != nil {
 				t.Errorf("failed to parse %v, got %v", test.b, err)
 				return
@@ -100,12 +100,12 @@ func TestSub(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			a, err := ParseQty(test.a)
+			a, err := Parse(test.a)
 			if err != nil {
 				t.Errorf("failed to parse %v, got %v", test.a, err)
 				return
 			}
-			b, err := ParseQty(test.b)
+			b, err := Parse(test.b)
 			if err != nil {
 				t.Errorf("failed to parse %v got %v", test.b, err)
 				return
@@ -166,12 +166,12 @@ func TestMul(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			a, err := ParseQty(test.a)
+			a, err := Parse(test.a)
 			if err != nil {
 				t.Errorf("failed to parse %v, got %v", test.a, err)
 				return
 			}
-			b, err := ParseQty(test.b)
+			b, err := Parse(test.b)
 			if err != nil {
 				t.Errorf("failed to parse %v got %v", test.b, err)
 				return
@@ -220,12 +220,12 @@ func TestDiv(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			a, err := ParseQty(test.a)
+			a, err := Parse(test.a)
 			if err != nil {
 				t.Errorf("failed to parse %v, got %v", test.a, err)
 				return
 			}
-			b, err := ParseQty(test.b)
+			b, err := Parse(test.b)
 			if err != nil {
 				t.Errorf("failed to parse %v got %v", test.b, err)
 				return

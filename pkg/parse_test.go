@@ -1,4 +1,4 @@
-package goqty
+package qty
 
 import (
 	"slices"
@@ -44,7 +44,7 @@ func TestParse(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			q, err := ParseQty(test.expr)
+			q, err := Parse(test.expr)
 			if err != nil {
 				t.Errorf("failed to parse %v, got %v", test.expr, err)
 			} else {
@@ -86,7 +86,7 @@ func TestParseFailure(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			q, err := ParseQty(test.expr)
+			q, err := Parse(test.expr)
 			if err != nil {
 				if err.Error() != test.expected {
 					t.Errorf("expected error %v, got %v", test.expected, err)

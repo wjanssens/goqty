@@ -1,4 +1,4 @@
-package goqty
+package qty
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ func (q *Qty) Add(input interface{}) (*Qty, error) {
 	case *Qty:
 		other = input.(*Qty)
 	case string:
-		if other, err = ParseQty(input.(string)); err != nil {
+		if other, err = Parse(input.(string)); err != nil {
 			return nil, err
 		}
 	default:
@@ -43,7 +43,7 @@ func (q *Qty) Sub(input interface{}) (*Qty, error) {
 	case *Qty:
 		other = input.(*Qty)
 	case string:
-		if other, err = ParseQty(input.(string)); err != nil {
+		if other, err = Parse(input.(string)); err != nil {
 			return nil, err
 		}
 	default:
@@ -78,7 +78,7 @@ func (q *Qty) Mul(input interface{}) (*Qty, error) {
 	case *Qty:
 		other = input.(*Qty)
 	case string:
-		if other, err = ParseQty(input.(string)); err != nil {
+		if other, err = Parse(input.(string)); err != nil {
 			return nil, err
 		}
 	default:
@@ -122,7 +122,7 @@ func (q *Qty) Div(input interface{}) (*Qty, error) {
 	case *Qty:
 		other = input.(*Qty)
 	case string:
-		if other, err = ParseQty(input.(string)); err != nil {
+		if other, err = Parse(input.(string)); err != nil {
 			return nil, err
 		}
 	default:

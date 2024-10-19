@@ -1,4 +1,4 @@
-package goqty
+package qty
 
 import (
 	"slices"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestInit(t *testing.T) {
-	qty, err := ParseQty("m")
+	qty, err := Parse("m")
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
 	}
@@ -19,7 +19,7 @@ func TestInit(t *testing.T) {
 }
 
 func TestUnitless(t *testing.T) {
-	qty, err := ParseQty("1")
+	qty, err := Parse("1")
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
 	}
@@ -32,7 +32,7 @@ func TestUnitless(t *testing.T) {
 	if !slices.Equal(qty.denominator, []string{"<1>"}) {
 		t.Errorf("got %v, wanted %v", qty.denominator, "[<1>]")
 	}
-	qty, err = ParseQty("1.5")
+	qty, err = Parse("1.5")
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
 	}

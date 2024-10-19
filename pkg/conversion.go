@@ -1,4 +1,4 @@
-package goqty
+package qty
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ func (q *Qty) To(other interface{}) (*Qty, error) {
 	case *Qty:
 		o = other.(*Qty)
 	case string:
-		if o, err = ParseQty(other.(string)); err != nil {
+		if o, err = Parse(other.(string)); err != nil {
 			return nil, err
 		}
 	default:
@@ -30,7 +30,7 @@ func (q *Qty) To(other interface{}) (*Qty, error) {
 	// }
 
 	// Instantiating target to normalize units
-	target, err := NewQty(1, o.Units())
+	target, err := New(1, o.Units())
 	if err != nil {
 		return target, err
 	} else if target.Units() == q.Units() {
@@ -119,7 +119,7 @@ func (q *Qty) ToPrec(precision interface{}) (*Qty, error) {
 	case *Qty:
 		p = precision.(*Qty)
 	case string:
-		if p, err = ParseQty(precision.(string)); err != nil {
+		if p, err = Parse(precision.(string)); err != nil {
 			return nil, err
 		}
 	default:
@@ -139,7 +139,7 @@ func (q *Qty) ToPrec(precision interface{}) (*Qty, error) {
 
 	resultScalar := mulSafe(math.Round(q.scalar/p.scalar), p.scalar)
 
-	return NewQty(resultScalar, q.Units())
+	return New(resultScalar, q.Units())
 }
 
 /**
@@ -166,9 +166,9 @@ func (q *Qty) ToPrec(precision interface{}) (*Qty, error) {
 func SwiftConverter(srcUnits, dstUnits string) (converter func(values []float64) ([]float64, error), err error) {
 	var srcQty *Qty
 	var dstQty *Qty
-	if srcQty, err = ParseQty(srcUnits); err != nil {
+	if srcQty, err = Parse(srcUnits); err != nil {
 		return converter, err
-	} else if dstQty, err = ParseQty(dstUnits); err != nil {
+	} else if dstQty, err = Parse(dstUnits); err != nil {
 		return converter, err
 	}
 

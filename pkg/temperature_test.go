@@ -1,4 +1,4 @@
-package goqty
+package qty
 
 import (
 	"math"
@@ -22,7 +22,7 @@ func TestTemperatureBaseUnit(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			qty, err := ParseQty(test.q)
+			qty, err := Parse(test.q)
 			if err != nil {
 				t.Errorf("failed to create %v", test.q)
 			}
@@ -43,48 +43,48 @@ func TestTemperatureBaseUnit(t *testing.T) {
 }
 
 func TestAbsoluteZero(t *testing.T) {
-	if q, err := ParseQty("-1 tempK"); err == nil {
+	if q, err := Parse("-1 tempK"); err == nil {
 		t.Errorf("expected error, got %v", q)
 	}
-	if q, err := ParseQty("-273.16 tempC"); err == nil {
+	if q, err := Parse("-273.16 tempC"); err == nil {
 		t.Errorf("expected error, got %v", q)
 	}
-	if q, err := ParseQty("-459.68 tempF"); err == nil {
+	if q, err := Parse("-459.68 tempF"); err == nil {
 		t.Errorf("expected error, got %v", q)
 	}
-	if q, err := ParseQty("-1 tempR"); err == nil {
+	if q, err := Parse("-1 tempR"); err == nil {
 		t.Errorf("expected error, got %v", q)
 	}
 
-	if q, err := ParseQty("1 tempK"); err != nil {
+	if q, err := Parse("1 tempK"); err != nil {
 		t.Errorf("failed to create '1 tempK': %v", err)
 	} else {
 		if q, err := q.Mul(-1); err == nil {
 			t.Errorf("expected error, got %v", q)
 		}
 	}
-	if q, err := ParseQty("0 tempK"); err != nil {
+	if q, err := Parse("0 tempK"); err != nil {
 		t.Errorf("failed to create '0 tempK': %v", err)
 	} else {
 		if q, err := q.Sub("1 degK"); err == nil {
 			t.Errorf("expected error, got %v", q)
 		}
 	}
-	if q, err := ParseQty("-273.15 tempC"); err != nil {
+	if q, err := Parse("-273.15 tempC"); err != nil {
 		t.Errorf("failed to create '0 tempK': %v", err)
 	} else {
 		if q, err := q.Sub("1 degC"); err == nil {
 			t.Errorf("expected error, got %v", q)
 		}
 	}
-	if q, err := ParseQty("-459.67 tempF"); err != nil {
+	if q, err := Parse("-459.67 tempF"); err != nil {
 		t.Errorf("failed to create '0 tempK': %v", err)
 	} else {
 		if q, err := q.Sub("1 degF"); err == nil {
 			t.Errorf("expected error, got %v", q)
 		}
 	}
-	if q, err := ParseQty("0 tempR"); err != nil {
+	if q, err := Parse("0 tempR"); err != nil {
 		t.Errorf("failed to create '0 tempK': %v", err)
 	} else {
 		if q, err := q.Sub("1 degR"); err == nil {

@@ -1,4 +1,4 @@
-package goqty
+package qty
 
 import "testing"
 
@@ -25,7 +25,7 @@ func TestTo(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			qty, err := ParseQty(test.expr)
+			qty, err := Parse(test.expr)
 			if err != nil {
 				t.Errorf("failed to parse %v, got %v", test.expr, err)
 				return
@@ -65,7 +65,7 @@ func TestToPrec(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			qty, err := ParseQty(test.q)
+			qty, err := Parse(test.q)
 			if err != nil {
 				t.Errorf("failed to parse %v, got %v", test.q, err)
 				return

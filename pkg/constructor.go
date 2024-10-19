@@ -1,4 +1,4 @@
-package goqty
+package qty
 
 import (
 	"fmt"
@@ -52,9 +52,9 @@ func newQty(scalar float64, numerator []string, denominator []string) (*Qty, err
 	return &result, nil
 
 }
-func NewQty(scalar float64, units string) (*Qty, error) {
+func New(scalar float64, units string) (*Qty, error) {
 	if units != "" {
-		if q, err := ParseQty(units); err != nil {
+		if q, err := Parse(units); err != nil {
 			return nil, err
 		} else {
 			return newQty(scalar, q.numerator, q.denominator)

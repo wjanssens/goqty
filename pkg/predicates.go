@@ -1,4 +1,4 @@
-package goqty
+package qty
 
 import (
 	"regexp"

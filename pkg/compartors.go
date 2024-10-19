@@ -1,4 +1,4 @@
-package goqty
+package qty
 
 import "fmt"
 
@@ -57,8 +57,8 @@ func (q *Qty) Gte(other interface{}) (bool, error) {
 //	if a.CompareTo(b) == 0 then b.CompareTo(a) == 0
 //
 //	Since "10S" == ".1ohm" (10 > .1) and "10ohm" == ".1S" (10 > .1)
-//	  Qty("10S").Inverse().CompareTo(ParseQty("10ohm")) == -1
-//	  Qty("10ohm").Inverse().CompareTo(ParseQty("10S")) == -1
+//	  Qty("10S").Inverse().CompareTo(Parse("10ohm")) == -1
+//	  Qty("10ohm").Inverse().CompareTo(Parse("10S")) == -1
 //
 //	If including inverses in the sort is needed, I suggest writing: Qty.sort(qtyArray,units)
 func (q *Qty) CompareTo(other interface{}) (int, error) {
@@ -68,7 +68,7 @@ func (q *Qty) CompareTo(other interface{}) (int, error) {
 	case *Qty:
 		o = other.(*Qty)
 	case string:
-		if o, err = ParseQty(other.(string)); err != nil {
+		if o, err = Parse(other.(string)); err != nil {
 			return 0, err
 		}
 	default:
@@ -97,7 +97,7 @@ func (q *Qty) Same(other interface{}) (bool, error) {
 	case *Qty:
 		o = other.(*Qty)
 	case string:
-		if o, err = ParseQty(other.(string)); err != nil {
+		if o, err = Parse(other.(string)); err != nil {
 			return false, err
 		}
 	default:

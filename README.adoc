@@ -19,7 +19,7 @@ import (
     "fmt"
     "github.com/wjanssens/goqty"
 )
-if q, err := goqty.ParseQty("50km/h"); err == nil {
+if q, err := goqty.Parse("50km/h"); err == nil {
     fmt.Printf("%v\n", q) // => 50 km/h
 }
 ----
@@ -29,30 +29,30 @@ if q, err := goqty.ParseQty("50km/h"); err == nil {
 .Creation
 [source,go]
 ----
-qty, err = ParseQty("1m");
-qty, err = ParseQty('m'); // scalar defaults to 1
+qty, err = Parse("1m");
+qty, err = Parse('m'); // scalar defaults to 1
 
 // compound numerators
-qty, err = ParseQty("1 N*m");
-qty, err = ParseQty("1 N m"); // * is optional
+qty, err = Parse("1 N*m");
+qty, err = Parse("1 N m"); // * is optional
 
 // denominators
-qty, err = ParseQty("1 m/s");
+qty, err = Parse("1 m/s");
 
 // powers
-qty, err = ParseQty("1 m^2/s**2"); // ^ or **
-qty, err = ParseQty("1 m^2 s^-2"); // negative powers
-qty, err = ParseQty("1 m2 s-2"); // ^ is optional
+qty, err = Parse("1 m^2/s**2"); // ^ or **
+qty, err = Parse("1 m^2 s^-2"); // negative powers
+qty, err = Parse("1 m2 s-2"); // ^ is optional
 
-qty, err = ParseQty("1 m^2 kg^2 J^2/s^2 A");
+qty, err = Parse("1 m^2 kg^2 J^2/s^2 A");
 
 // unitless quantities
-qty, err = ParseQty("1.5");
-qty, err = NewQty(1.5, "");
+qty, err = Parse("1.5");
+qty, err = New(1.5, "");
 
 // unicode prefixes and units
-qty, err = ParseQty("1.5 µm");
-qty, err = ParseQty("1.5 Ω");
+qty, err = Parse("1.5 µm");
+qty, err = Parse("1.5 Ω");
 
 qty = Qty("1 attoparsec/microfortnight");
 ----

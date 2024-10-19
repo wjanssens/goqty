@@ -1,4 +1,4 @@
-package goqty
+package qty
 
 import (
 	"testing"
@@ -21,7 +21,7 @@ func TestNew(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			actual, err := NewQty(test.scalar, test.units)
+			actual, err := New(test.scalar, test.units)
 			if err != nil {
 				t.Errorf("failed to create, got %v", err)
 				return
