@@ -34,6 +34,8 @@ func TestParse(t *testing.T) {
 		"1 ohm":     {"1 ohm", "1 \u2126", 1, "resistance", []string{"<ohm>"}, []string{"<1>"}},
 		"1 \u03A9":  {"1 \u03A9", "1 \u2126", 1, "resistance", []string{"<ohm>"}, []string{"<1>"}}, // Greek
 		"1 \u2126":  {"1 \u2126", "1 \u2126", 1, "resistance", []string{"<ohm>"}, []string{"<1>"}}, // ohm
+		"1 \u00b0":  {"1 \u00b0", "1 \u00b0", 1, "angle", []string{"<degree>"}, []string{"<1>"}},
+		"1 \u00b0C": {"1 \u00b0C", "1 \u00b0C", 1, "temperature", []string{"<celsius>"}, []string{"<1>"}},
 		// compound
 		"5 N*m":  {"5 N*m", "5 N*m", 5, "energy", []string{"<newton>", "<meter>"}, []string{"<1>"}},
 		"3 A/km": {"3 A/km", "3 A/km", 3, "magnetism", []string{"<ampere>"}, []string{"<kilo>", "<meter>"}},
