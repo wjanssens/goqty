@@ -8,6 +8,19 @@ import (
 	"golang.org/x/text/number"
 )
 
+func TestConductivity(t *testing.T) {
+	qty, err := Parse("1 millisiemens/centimeter")
+	if err != nil {
+		t.Errorf("failed to create '1 millisiemens/centimeter'")
+		return
+	}
+	f := qty.Format(DefaultFormatter)
+	expected := "1 mS/cm"
+	if f != expected {
+		t.Errorf("expected formatted %v, got %v", expected, f)
+	}
+}
+
 func TestDefaultFormatter(t *testing.T) {
 	qty, err := Parse("2.987654321 m")
 	if err != nil {
@@ -15,10 +28,6 @@ func TestDefaultFormatter(t *testing.T) {
 		return
 	}
 	f := qty.Format(DefaultFormatter)
-	if err != nil {
-		t.Errorf("failed to format, got %v", err)
-		return
-	}
 	expected := "2.987654321 m"
 	if f != expected {
 		t.Errorf("expected formatted %v, got %v", expected, f)

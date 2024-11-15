@@ -3,6 +3,7 @@ package qty
 var kinds = map[int]string{
 	-312078:      "elastance",
 	-312058:      "resistance",
+	-312057:      "resistivity",
 	-312038:      "inductance",
 	-152058:      "potential",
 	-152040:      "magnetism",
@@ -38,6 +39,7 @@ var kinds = map[int]string{
 	159999:       "magnetism",
 	160000:       "current",
 	160020:       "charge",
+	312057:       "conductivity",
 	312058:       "conductance",
 	312078:       "capacitance",
 	3199980:      "activity",
