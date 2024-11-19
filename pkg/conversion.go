@@ -149,19 +149,8 @@ func (q *Qty) ToPrec(precision interface{}) (*Qty, error) {
  * with same units into others with iterative methods.
  * Does not take care of rounding issues.
  *
- * @param {string} srcUnits Units of values to convert
- * @param {string} dstUnits Units to convert to
- *
- * @returns {Function} Converting function accepting Number value
- *   and returning converted value
- *
- * @throws "Incompatible units" if units are incompatible
- *
- * @example
- * // Converting large array of numbers with the same units
- * // into other units
- * var converter = Qty.swiftConverter("m/h", "ft/s");
- * var convertedSerie = largeSerie.map(converter);
+ * converter, _ := qty.SwiftConverter("m/h", "ft/s")
+ * converted, _ := converter([]float64{...})
  */
 func SwiftConverter(srcUnits, dstUnits string) (converter func(values []float64) ([]float64, error), err error) {
 	var srcQty *Qty
