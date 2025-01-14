@@ -1,4 +1,4 @@
-package qty
+package goqty
 
 var kinds = map[int]string{
 	-312078:      "elastance",

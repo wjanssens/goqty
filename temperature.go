@@ -1,4 +1,4 @@
-package qty
+package goqty
 
 import (
 	"fmt"
